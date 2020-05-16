@@ -58,7 +58,6 @@ def generate_prob_table():
 
             # Two pairs
             occurance_combinations = product(range(2, 5), range(2, 5))
-            # frequency = sum([binom(4, c1)*binom(4, c1)*binom(24-n-c1-c2, o-c1-c2) for c1, c2 in occurance_combinations])
             frequency = sum([binom(4, c1)*binom(4, c2)*binom(24-n-8, o-c1-c2) for c1, c2 in occurance_combinations])
             twopairs_prob = frequency / all_states
 
@@ -163,7 +162,6 @@ def generate_prob_table():
             flush_great_prob = frequency / all_states
 
             # Full house
-            # frequency = 4 * binom(4, 2) * binom(24-n-5, o-5)
             occurance_combinations = product(range(3, 5), range(2, 5))
             frequency = sum([binom(4, c1)*binom(4, c2)*binom(24-n-8, o-c1-c2) for c1, c2 in occurance_combinations])
             fullhouse_prob = frequency / all_states
