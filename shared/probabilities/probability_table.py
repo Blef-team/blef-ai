@@ -1,12 +1,11 @@
+from os import path
 from scipy.special import binom
-from itertools import product, groupby
-from functools import reduce
-import operator
-import math
+from itertools import product
 import pandas as pd
 import numpy as np
 
-def generate_prob_table():
+
+def generate(filename="bet_probabilities.csv"):
     """
         Generate a dataframe of conditional probabilities
         of the occurance of a bet, given
@@ -246,12 +245,27 @@ def generate_prob_table():
 
     table = pd.DataFrame.from_dict(rows)
     table.set_index(["index"], inplace=True, verify_integrity=True)
+    if filename:
+        table.to_csv(filename)
+
     return table
+
+
+def load(filename="bet_probabilities.csv"):
+    if filename and path.exists(filename):
+        return pd.read_csv(filename)
+    else:
+        raise FileNotFoundError("Got no valid filename. filename: {}".format(filename))
+
+
+def get():
+    try:
+        return load()
+    except FileNotFoundError:
+        return generate()
 
 
 if __name__ == "__main__":
     """ Run script manually - generate and save a table of probabilities """
-    table = generate_prob_table()
-    filename = "bet_probabilities.csv"
-    table.to_csv(filename)
-    print("Generated a probability table with {} rows and {} columns. Saved to {}".format(table.shape[0], table.shape[1], filename))
+    generate()
+    print("Generated a probability table with {} rows and {} columns.".format(table.shape[0], table.shape[1]))
