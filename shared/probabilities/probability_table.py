@@ -253,7 +253,7 @@ def generate(filename="bet_probabilities.csv"):
 
 def load(filename="bet_probabilities.csv"):
     if filename and path.exists(filename):
-        return pd.read_csv(filename)
+        return pd.read_csv(filename, index_col="index")
     else:
         raise FileNotFoundError("Got no valid filename. filename: {}".format(filename))
 
