@@ -267,5 +267,5 @@ def get():
 
 if __name__ == "__main__":
     """ Run script manually - generate and save a table of probabilities """
-    generate()
+    table = generate()
     print("Generated a probability table with {} rows and {} columns.".format(table.shape[0], table.shape[1]))
