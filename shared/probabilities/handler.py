@@ -22,12 +22,15 @@ class Handler(object):
 
         return np.fromfunction(np.vectorize(self.get_bet_prob), (88,))
 
+    def get_table_value(self, column):
+        index = len(self.cards)*100 + self.others_card_num
+        return self.probs_table.loc[[index], [column]].values[0]
+
     def get_bet_prob(self, action_id):
         if action_id in range(6):
             if action_id in self.cards:
                 return 1.0
             else:
-                index = len(self.cards)*100 + self.others_card_num
-                return self.probs_table.loc[[index], ["highcard"]].values[0]
+                return self.get_table_value("highcard")
         else:
             return 0.0
