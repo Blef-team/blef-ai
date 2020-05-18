@@ -59,8 +59,8 @@ class Handler(object):
             raise TypeError("'cards' is not an iterable of integer tuples")
         self.cards = Cards(cards)
 
-        if others_card_num <= 0 or others_card_num >= 24:
-            raise ValueError("No valid 'others_card_num' provided")
+        if others_card_num <= 0 or (others_card_num + len(cards)) > 24:
+            raise ValueError("Invalid 'others_card_num' provided")
         self.others_card_num = others_card_num
 
         return np.fromfunction(np.vectorize(self.get_bet_prob), (88,))
