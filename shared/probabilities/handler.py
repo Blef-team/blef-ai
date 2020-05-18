@@ -209,6 +209,22 @@ class Handler(object):
             if len(self.cards.with_value[value]) == 1:
                 return self.get_table_value(pt.BetType.FOUR_HAVE_1)
             return self.get_table_value(pt.BetType.FOUR)
+        elif action_id in range(76, 84):
+            # Small flush & big flush
+            colour = self.card_colour_for_bet[action_id]
+            relevant_cards = [card for value in self.card_values_for_bet[action_id] for card in self.cards.with_value[value]]
+            have_n_cards = len(Cards.group_cards(relevant_cards, by="colour")[colour])
+            if have_n_cards == 5:
+                return 1.0
+            if have_n_cards == 4:
+                return self.get_table_value(pt.BetType.FLUSH_HAVE_4)
+            if have_n_cards == 3:
+                return self.get_table_value(pt.BetType.FOUR_HAVE_3)
+            if have_n_cards == 2:
+                return self.get_table_value(pt.BetType.FLUSH_HAVE_2)
+            if have_n_cards == 1:
+                return self.get_table_value(pt.BetType.FOUR_HAVE_1)
+            return self.get_table_value(pt.BetType.FLUSH)
 
 
         else:
