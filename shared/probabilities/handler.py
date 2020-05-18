@@ -137,7 +137,7 @@ class Handler(object):
                 return self.get_table_value(pt.BetType.STRAIGHT)
             raise ValueError("It's impossible to have no cards matching a great straight! (empty hand?)")
         elif action_id in range(30, 36):
-            # Three
+            # Three of a kind
             value = self.card_values_for_bet[action_id][0]
             if len(self.cards.with_value[value]) >= 3:
                 return 1.0
@@ -147,6 +147,7 @@ class Handler(object):
                 return self.get_table_value(pt.BetType.THREE_HAVE_1)
             return self.get_table_value(pt.BetType.THREE)
         elif action_id in range(36, 66):
+            # Full house
             value_1, value_2 = self.card_values_for_bet[action_id]
             if len(self.cards.with_value[value_1]) >= 3 and len(self.cards.with_value[value_2]) >= 2:
                 return 1.0
@@ -172,6 +173,7 @@ class Handler(object):
                 return self.get_table_value(pt.BetType.FULLHOUSE_HAVE_1_AND_1)
             return self.get_table_value(pt.BetType.FULLHOUSE)
         elif action_id in range(66,70):
+            # Colour
             colour = self.card_colour_for_bet[action_id]
             if len(self.cards.with_colour[colour]) >= 5:
                 return 1.0
@@ -184,6 +186,18 @@ class Handler(object):
             if len(self.cards.with_colour[colour]) == 1:
                 return self.get_table_value(pt.BetType.COLOUR_HAVE_1)
             return self.get_table_value(pt.BetType.COLOUR)
+        elif action_id in range(70,76):
+            # Four of a kind
+            value = self.card_values_for_bet[action_id][0]
+            if len(self.cards.with_value[value]) == 4:
+                return 1.0
+            if len(self.cards.with_value[value]) == 3:
+                return self.get_table_value(pt.BetType.FOUR_HAVE_3)
+            if len(self.cards.with_value[value]) == 2:
+                return self.get_table_value(pt.BetType.FOUR_HAVE_2)
+            if len(self.cards.with_value[value]) == 1:
+                return self.get_table_value(pt.BetType.FOUR_HAVE_1)
+            return self.get_table_value(pt.BetType.FOUR)
 
 
         else:
