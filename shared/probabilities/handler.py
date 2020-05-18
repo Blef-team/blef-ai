@@ -33,6 +33,7 @@ class Handler(object):
     def __init__(self):
         super(Handler, self).__init__()
         self.probs_table = pt.get()
+        # Validate probs_table - check header for all bet types
         bet_types = [getattr(pt.BetType, attr) for attr in dir(pt.BetType) if not callable(getattr(pt.BetType, attr)) and not attr.startswith("__")]
         if not all(bet_type in self.probs_table.columns for bet_type in bet_types):
             print([(bet_type, bet_type in self.probs_table.columns) for bet_type in bet_types])
@@ -62,11 +63,13 @@ class Handler(object):
         except (ValueError, TypeError) as e:
             raise e("action_id is not valid: {}".format(action_id))
         if action_id in range(6):
+            # High card
             if action_id in self.cards.values:
                 return 1.0
             else:
                 return self.get_table_value("highcard")
         elif action_id in range(6, 12):
+            # Pair
             value = self.card_values_for_bet[action_id][0]
             if len(self.cards.with_value[value]) >= 2:
                 return 1.0
@@ -74,6 +77,7 @@ class Handler(object):
                 return self.get_table_value(pt.BetType.PAIR_HAVE_1)
             return self.get_table_value(pt.BetType.PAIR)
         elif action_id in range(12, 27):
+            # Two cards
             value_1, value_2 = self.card_values_for_bet[action_id]
             if len(self.cards.with_value[value_1]) >= 2 and len(self.cards.with_value[value_2]) >= 2:
                 return 1.0
@@ -92,7 +96,40 @@ class Handler(object):
             if len(self.cards.with_value[value_1]) == 0 and len(self.cards.with_value[value_2]) == 1:
                 return self.get_table_value(pt.BetType.TWOPAIRS_HAVE_1)
             return self.get_table_value(pt.BetType.TWOPAIRS)
-
+        elif action_id in {27, 28}:
+            if action_id == 27:
+                # Small straight
+                have_n_cards = sum([bool(self.cards.with_value[value]) for value in range(5)])
+            else:
+                # Big straight
+                have_n_cards = sum([bool(self.cards.with_value[value]) for value in range(1,6)])
+            if have_n_cards == 5:
+                return 1.0
+            if have_n_cards == 4:
+                return self.get_table_value(pt.BetType.STRAIGHT_HAVE_4)
+            if have_n_cards == 3:
+                return self.get_table_value(pt.BetType.STRAIGHT_HAVE_3)
+            if have_n_cards == 2:
+                return self.get_table_value(pt.BetType.STRAIGHT_HAVE_2)
+            if have_n_cards == 1:
+                return self.get_table_value(pt.BetType.STRAIGHT_HAVE_1)
+            return self.get_table_value(pt.BetType.STRAIGHT)
+        elif action_id == 29:
+            # Great straight
+            have_n_cards = sum([bool(self.cards.with_value[value]) for value in self.cards.with_value])
+            if have_n_cards == 6:
+                return 1.0
+            if have_n_cards == 5:
+                return self.get_table_value(pt.BetType.STRAIGHT_HAVE_4)
+            if have_n_cards == 4:
+                return self.get_table_value(pt.BetType.STRAIGHT_HAVE_3)
+            if have_n_cards == 3:
+                return self.get_table_value(pt.BetType.STRAIGHT_HAVE_2)
+            if have_n_cards == 2:
+                return self.get_table_value(pt.BetType.STRAIGHT_HAVE_1)
+            if have_n_cards == 1:
+                return self.get_table_value(pt.BetType.STRAIGHT)
+            raise ValueError("It's impossible to have no cards matching a great straight! (empty hand?)")
 
         else:
             return 0.0
