@@ -75,12 +75,14 @@ class Handler(object):
             action_id = int(action_id)
         except (ValueError, TypeError) as e:
             raise e("action_id is not valid: {}".format(action_id))
+        
         if action_id in range(6):
             # High card
             if action_id in self.cards.values:
                 return 1.0
             else:
                 return self.get_table_value("highcard")
+
         elif action_id in range(6, 12):
             # Pair
             value = self.card_values_for_bet[action_id][0]
@@ -89,6 +91,7 @@ class Handler(object):
             if len(self.cards.with_value[value]) == 1:
                 return self.get_table_value(pt.BetType.PAIR_HAVE_1)
             return self.get_table_value(pt.BetType.PAIR)
+
         elif action_id in range(12, 27):
             # Two cards
             value_1, value_2 = self.card_values_for_bet[action_id]
@@ -111,6 +114,7 @@ class Handler(object):
             if value_1_num == 0 and value_2_num == 1:
                 return self.get_table_value(pt.BetType.TWOPAIRS_HAVE_1)
             return self.get_table_value(pt.BetType.TWOPAIRS)
+
         elif action_id in {27, 28}:
             # Small straight & Big straight
             have_n_cards = sum([bool(self.cards.with_value[value]) for value in self.card_values_for_bet[action_id]])
@@ -125,6 +129,7 @@ class Handler(object):
             if have_n_cards == 1:
                 return self.get_table_value(pt.BetType.STRAIGHT_HAVE_1)
             return self.get_table_value(pt.BetType.STRAIGHT)
+
         elif action_id == 29:
             # Great straight
             have_n_cards = sum([bool(self.cards.with_value[value]) for value in self.cards.with_value])
@@ -141,6 +146,7 @@ class Handler(object):
             if have_n_cards == 1:
                 return self.get_table_value(pt.BetType.STRAIGHT)
             raise ValueError("It's impossible to have no cards matching a great straight! (empty hand?)")
+
         elif action_id in range(30, 36):
             # Three of a kind
             value = self.card_values_for_bet[action_id][0]
@@ -151,6 +157,7 @@ class Handler(object):
             if len(self.cards.with_value[value]) == 1:
                 return self.get_table_value(pt.BetType.THREE_HAVE_1)
             return self.get_table_value(pt.BetType.THREE)
+
         elif action_id in range(36, 66):
             # Full house
             value_1, value_2 = self.card_values_for_bet[action_id]
@@ -179,6 +186,7 @@ class Handler(object):
             if value_1_num == 1 and value_2_num == 0:
                 return self.get_table_value(pt.BetType.FULLHOUSE_HAVE_1_AND_1)
             return self.get_table_value(pt.BetType.FULLHOUSE)
+
         elif action_id in range(66, 70):
             # Colour
             colour = self.card_colour_for_bet[action_id]
@@ -193,6 +201,7 @@ class Handler(object):
             if len(self.cards.with_colour[colour]) == 1:
                 return self.get_table_value(pt.BetType.COLOUR_HAVE_1)
             return self.get_table_value(pt.BetType.COLOUR)
+
         elif action_id in range(70, 76):
             # Four of a kind
             value = self.card_values_for_bet[action_id][0]
@@ -205,6 +214,7 @@ class Handler(object):
             if len(self.cards.with_value[value]) == 1:
                 return self.get_table_value(pt.BetType.FOUR_HAVE_1)
             return self.get_table_value(pt.BetType.FOUR)
+
         elif action_id in range(76, 84):
             # Small flush & big flush
             colour = self.card_colour_for_bet[action_id]
@@ -222,6 +232,22 @@ class Handler(object):
                 return self.get_table_value(pt.BetType.FOUR_HAVE_1)
             return self.get_table_value(pt.BetType.FLUSH)
 
-
+        elif action_id in range(84, 88):
+            # Great flush
+            colour = self.card_colour_for_bet[action_id]
+            have_n_cards = len(self.cards.with_colour[colour])
+            if have_n_cards == 6:
+                return 1.0
+            if have_n_cards == 5:
+                return self.get_table_value(pt.BetType.FLUSH_HAVE_4)
+            if have_n_cards == 4:
+                return self.get_table_value(pt.BetType.FOUR_HAVE_3)
+            if have_n_cards == 3:
+                return self.get_table_value(pt.BetType.FLUSH_HAVE_2)
+            if have_n_cards == 2:
+                return self.get_table_value(pt.BetType.FOUR_HAVE_1)
+            if have_n_cards == 1:
+                return self.get_table_value(pt.BetType.FLUSH)
+            return self.get_table_value(pt.BetType.FLUSH_GREAT)
         else:
-            return 0.0
+            raise ValueError("action_id must be from 0 to 87 (inclusive)")
