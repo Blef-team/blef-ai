@@ -114,8 +114,7 @@ class Handler(object):
         # High card
         if action_id in self.cards.values:
             return 1.0
-        else:
-            return self.get_table_value("highcard")
+        return self.get_table_value("highcard")
 
     def get_pair_prob(self, action_id):
         # Pair
