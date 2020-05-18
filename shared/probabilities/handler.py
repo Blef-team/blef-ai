@@ -1,4 +1,5 @@
 import itertools
+from collections import defaultdict
 import numpy as np
 from shared.probabilities import probability_table as pt
 
@@ -12,10 +13,13 @@ class Cards(object):
         self.__raw = cards
         self.values = set(list(zip(*cards))[0])
         self.colours = set(list(zip(*cards))[1])
-        self.with_value = {i: [] for i in range(6)}
-        self.with_colour = {i: [] for i in range(4)}
-        self.with_value.update({tup[0]: list(tup[1]) for tup in itertools.groupby(cards, lambda x: x[0])})
-        self.with_colour.update({tup[0]: list(tup[1]) for tup in itertools.groupby(cards, lambda x: x[1])})
+        # Group cards by colour and value
+        self.with_value = defaultdict(list)
+        self.with_colour = defaultdict(list)
+        for value, grouped_cards in itertools.groupby(cards, lambda x: x[0]):
+            self.with_value[value].extend(list(grouped_cards))
+        for colour, grouped_cards in itertools.groupby(cards, lambda x: x[1]):
+            self.with_colour[colour].extend(list(grouped_cards))
 
     def __getitem__(self, index):
         return self.__raw[index]
