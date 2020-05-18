@@ -39,7 +39,7 @@ class Handler(object):
         if not all(bet_type in self.probs_table.columns for bet_type in bet_types):
             print([(bet_type, bet_type in self.probs_table.columns) for bet_type in bet_types])
             raise ValueError("The probability table is corrupted! Consider deleting the CSV.")
-        self.card_values_for_bet = {0: [0], 1: [1], 2: [2], 3: [3], 4: [4], 5: [5], 6: [0], 7: [1], 8: [2], 9: [3], 10: [4], 11: [5], 12: [0, 1], 13: [0, 2], 14: [1, 2], 15: [0, 3], 16: [1, 3], 17: [2, 3], 18: [0, 4], 19: [1, 4], 20: [2, 4], 21: [3, 4], 22: [0, 5], 23: [1, 5], 24: [2, 5], 25: [3, 5], 26: [4, 5], 30: [0], 31: [1], 32: [2], 33: [3], 34: [4], 35: [5], 36: [0, 1], 37: [0, 2], 38: [0, 3], 39: [0, 4], 40: [5], 41: [1], 42: [1, 2], 43: [1, 3], 44: [1, 4], 45: [1, 5], 46: [0, 2], 47: [1, 2], 48: [2, 3], 49: [2, 4], 50: [2, 5], 51: [0, 3], 52: [1, 3], 53: [2, 3], 54: [3, 4], 55: [3, 5], 56: [0, 4], 57: [1, 4], 58: [2, 4], 59: [3, 4], 60: [4, 5], 61: [0, 5], 62: [1, 5], 63: [2, 5], 64: [3, 5], 65: [4, 5], 70: [0], 71: [1], 72: [2], 73: [3], 74: [4], 75: [5]}
+        self.card_values_for_bet = {0: [0], 1: [1], 2: [2], 3: [3], 4: [4], 5: [5], 6: [0], 7: [1], 8: [2], 9: [3], 10: [4], 11: [5], 12: [0, 1], 13: [0, 2], 14: [1, 2], 15: [0, 3], 16: [1, 3], 17: [2, 3], 18: [0, 4], 19: [1, 4], 20: [2, 4], 21: [3, 4], 22: [0, 5], 23: [1, 5], 24: [2, 5], 25: [3, 5], 26: [4, 5], 30: [0], 31: [1], 32: [2], 33: [3], 34: [4], 35: [5], 36: [0, 1], 37: [0, 2], 38: [0, 3], 39: [0, 4], 40: [0, 5], 41: [1, 0], 42: [1, 2], 43: [1, 3], 44: [1, 4], 45: [1, 5], 46: [2, 0], 47: [2, 1], 48: [2, 3], 49: [2, 4], 50: [2, 5], 51: [3, 0], 52: [3, 1], 53: [3, 2], 54: [3, 4], 55: [3, 5], 56: [4, 0], 57: [4, 1], 58: [4, 2], 59: [4, 3], 60: [4, 5], 61: [5, 0], 62: [5, 1], 63: [5, 2], 64: [5, 3], 65: [5, 4], 70: [0], 71: [1], 72: [2], 73: [3], 74: [4], 75: [5]}
 
     def get_probability_vector(self, cards=None, others_card_num=0):
         if cards is None:
@@ -141,6 +141,31 @@ class Handler(object):
             if len(self.cards.with_value[value]) == 1:
                 return self.get_table_value(pt.BetType.THREE_HAVE_1)
             return self.get_table_value(pt.BetType.THREE)
+        elif action_id in range(36, 66):
+            value_1, value_2 = self.card_values_for_bet[action_id]
+            if len(self.cards.with_value[value_1]) >= 3 and len(self.cards.with_value[value_2]) >= 2:
+                return 1.0
+            if len(self.cards.with_value[value_1]) == 2 and len(self.cards.with_value[value_2]) == 2:
+                return self.get_table_value(pt.BetType.THREE_HAVE_2)
+            if len(self.cards.with_value[value_1]) == 1 and len(self.cards.with_value[value_2]) == 2:
+                return self.get_table_value(pt.BetType.THREE_HAVE_1)
+            if len(self.cards.with_value[value_1]) == 0 and len(self.cards.with_value[value_2]) == 2:
+                return self.get_table_value(pt.BetType.THREE)
+            if len(self.cards.with_value[value_1]) >= 3 and len(self.cards.with_value[value_2]) == 1:
+                return self.get_table_value(pt.BetType.PAIR_HAVE_1)
+            if len(self.cards.with_value[value_1]) == 2 and len(self.cards.with_value[value_2]) == 1:
+                return self.get_table_value(pt.BetType.FULLHOUSE_HAVE_2_AND_1)
+            if len(self.cards.with_value[value_1]) == 1 and len(self.cards.with_value[value_2]) == 1:
+                return self.get_table_value(pt.BetType.FULLHOUSE_HAVE_1_AND_1)
+            if len(self.cards.with_value[value_1]) == 0 and len(self.cards.with_value[value_2]) == 1:
+                return self.get_table_value(pt.BetType.FULLHOUSE_HAVE_0_AND_1)
+            if len(self.cards.with_value[value_1]) >= 3 and len(self.cards.with_value[value_2]) == 0:
+                return self.get_table_value(pt.BetType.PAIR)
+            if len(self.cards.with_value[value_1]) == 2 and len(self.cards.with_value[value_2]) == 0:
+                return self.get_table_value(pt.BetType.FULLHOUSE_HAVE_2_AND_0)
+            if len(self.cards.with_value[value_1]) == 1 and len(self.cards.with_value[value_2]) == 0:
+                return self.get_table_value(pt.BetType.FULLHOUSE_HAVE_1_AND_1)
+            return self.get_table_value(pt.BetType.FULLHOUSE)
 
         else:
             return 0.0
