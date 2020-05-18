@@ -38,7 +38,6 @@ class Cards(object):
         raise ValueError("'by' needs to be either 'value' or 'colour'")
 
 
-
 class Handler(object):
     """Handler class for managing bet probability retrieval"""
 
@@ -75,179 +74,212 @@ class Handler(object):
             action_id = int(action_id)
         except (ValueError, TypeError) as e:
             raise e("action_id is not valid: {}".format(action_id))
-        
+
         if action_id in range(6):
-            # High card
-            if action_id in self.cards.values:
-                return 1.0
-            else:
-                return self.get_table_value("highcard")
+            return self.get_highcard_prob(action_id)
 
         elif action_id in range(6, 12):
-            # Pair
-            value = self.card_values_for_bet[action_id][0]
-            if len(self.cards.with_value[value]) >= 2:
-                return 1.0
-            if len(self.cards.with_value[value]) == 1:
-                return self.get_table_value(pt.BetType.PAIR_HAVE_1)
-            return self.get_table_value(pt.BetType.PAIR)
+            return self.get_pair_prob(action_id)
 
         elif action_id in range(12, 27):
-            # Two cards
-            value_1, value_2 = self.card_values_for_bet[action_id]
-            value_1_num = len(self.cards.with_value[value_1])
-            value_2_num = len(self.cards.with_value[value_2])
-            if value_1_num >= 2 and value_2_num >= 2:
-                return 1.0
-            if value_1_num >= 2 and value_2_num == 1:
-                return self.get_table_value(pt.BetType.PAIR_HAVE_1)
-            if value_1_num == 1 and value_2_num >= 2:
-                return self.get_table_value(pt.BetType.PAIR_HAVE_1)
-            if value_1_num >= 2 and value_2_num == 0:
-                return self.get_table_value(pt.BetType.PAIR)
-            if value_1_num == 0 and value_2_num >= 2:
-                return self.get_table_value(pt.BetType.PAIR)
-            if value_1_num == 1 and value_2_num == 1:
-                return self.get_table_value(pt.BetType.TWOPAIRS_HAVE_1_HAVE_1)
-            if value_1_num == 1 and value_2_num == 0:
-                return self.get_table_value(pt.BetType.TWOPAIRS_HAVE_1)
-            if value_1_num == 0 and value_2_num == 1:
-                return self.get_table_value(pt.BetType.TWOPAIRS_HAVE_1)
-            return self.get_table_value(pt.BetType.TWOPAIRS)
+            return self.get_twopairs_prob(action_id)
 
         elif action_id in {27, 28}:
-            # Small straight & Big straight
-            have_n_cards = sum([bool(self.cards.with_value[value]) for value in self.card_values_for_bet[action_id]])
-            if have_n_cards == 5:
-                return 1.0
-            if have_n_cards == 4:
-                return self.get_table_value(pt.BetType.STRAIGHT_HAVE_4)
-            if have_n_cards == 3:
-                return self.get_table_value(pt.BetType.STRAIGHT_HAVE_3)
-            if have_n_cards == 2:
-                return self.get_table_value(pt.BetType.STRAIGHT_HAVE_2)
-            if have_n_cards == 1:
-                return self.get_table_value(pt.BetType.STRAIGHT_HAVE_1)
-            return self.get_table_value(pt.BetType.STRAIGHT)
+            return self.get_straight_prob(action_id)
 
         elif action_id == 29:
-            # Great straight
-            have_n_cards = sum([bool(self.cards.with_value[value]) for value in self.cards.with_value])
-            if have_n_cards == 6:
-                return 1.0
-            if have_n_cards == 5:
-                return self.get_table_value(pt.BetType.STRAIGHT_HAVE_4)
-            if have_n_cards == 4:
-                return self.get_table_value(pt.BetType.STRAIGHT_HAVE_3)
-            if have_n_cards == 3:
-                return self.get_table_value(pt.BetType.STRAIGHT_HAVE_2)
-            if have_n_cards == 2:
-                return self.get_table_value(pt.BetType.STRAIGHT_HAVE_1)
-            if have_n_cards == 1:
-                return self.get_table_value(pt.BetType.STRAIGHT)
-            raise ValueError("It's impossible to have no cards matching a great straight! (empty hand?)")
+            return self.get_great_straight_prob(action_id)
 
         elif action_id in range(30, 36):
-            # Three of a kind
-            value = self.card_values_for_bet[action_id][0]
-            if len(self.cards.with_value[value]) >= 3:
-                return 1.0
-            if len(self.cards.with_value[value]) == 2:
-                return self.get_table_value(pt.BetType.THREE_HAVE_2)
-            if len(self.cards.with_value[value]) == 1:
-                return self.get_table_value(pt.BetType.THREE_HAVE_1)
-            return self.get_table_value(pt.BetType.THREE)
+            return self.get_three_prob(action_id)
 
         elif action_id in range(36, 66):
-            # Full house
-            value_1, value_2 = self.card_values_for_bet[action_id]
-            value_1_num = len(self.cards.with_value[value_1])
-            value_2_num = len(self.cards.with_value[value_2])
-            if value_1_num >= 3 and value_2_num >= 2:
-                return 1.0
-            if value_1_num == 2 and value_2_num == 2:
-                return self.get_table_value(pt.BetType.THREE_HAVE_2)
-            if value_1_num == 1 and value_2_num == 2:
-                return self.get_table_value(pt.BetType.THREE_HAVE_1)
-            if value_1_num == 0 and value_2_num == 2:
-                return self.get_table_value(pt.BetType.THREE)
-            if value_1_num >= 3 and value_2_num == 1:
-                return self.get_table_value(pt.BetType.PAIR_HAVE_1)
-            if value_1_num == 2 and value_2_num == 1:
-                return self.get_table_value(pt.BetType.FULLHOUSE_HAVE_2_AND_1)
-            if value_1_num == 1 and value_2_num == 1:
-                return self.get_table_value(pt.BetType.FULLHOUSE_HAVE_1_AND_1)
-            if value_1_num == 0 and value_2_num == 1:
-                return self.get_table_value(pt.BetType.FULLHOUSE_HAVE_0_AND_1)
-            if value_1_num >= 3 and value_2_num == 0:
-                return self.get_table_value(pt.BetType.PAIR)
-            if value_1_num == 2 and value_2_num == 0:
-                return self.get_table_value(pt.BetType.FULLHOUSE_HAVE_2_AND_0)
-            if value_1_num == 1 and value_2_num == 0:
-                return self.get_table_value(pt.BetType.FULLHOUSE_HAVE_1_AND_1)
-            return self.get_table_value(pt.BetType.FULLHOUSE)
+            return self.get_fullhouse_prob(action_id)
 
         elif action_id in range(66, 70):
-            # Colour
-            colour = self.card_colour_for_bet[action_id]
-            if len(self.cards.with_colour[colour]) >= 5:
-                return 1.0
-            if len(self.cards.with_colour[colour]) == 4:
-                return self.get_table_value(pt.BetType.COLOUR_HAVE_4)
-            if len(self.cards.with_colour[colour]) == 3:
-                return self.get_table_value(pt.BetType.COLOUR_HAVE_3)
-            if len(self.cards.with_colour[colour]) == 2:
-                return self.get_table_value(pt.BetType.COLOUR_HAVE_2)
-            if len(self.cards.with_colour[colour]) == 1:
-                return self.get_table_value(pt.BetType.COLOUR_HAVE_1)
-            return self.get_table_value(pt.BetType.COLOUR)
+            return self.get_colour_prob(action_id)
 
         elif action_id in range(70, 76):
-            # Four of a kind
-            value = self.card_values_for_bet[action_id][0]
-            if len(self.cards.with_value[value]) == 4:
-                return 1.0
-            if len(self.cards.with_value[value]) == 3:
-                return self.get_table_value(pt.BetType.FOUR_HAVE_3)
-            if len(self.cards.with_value[value]) == 2:
-                return self.get_table_value(pt.BetType.FOUR_HAVE_2)
-            if len(self.cards.with_value[value]) == 1:
-                return self.get_table_value(pt.BetType.FOUR_HAVE_1)
-            return self.get_table_value(pt.BetType.FOUR)
+            return self.get_four_prob(action_id)
 
         elif action_id in range(76, 84):
-            # Small flush & big flush
-            colour = self.card_colour_for_bet[action_id]
-            relevant_cards = [card for value in self.card_values_for_bet[action_id] for card in self.cards.with_value[value]]
-            have_n_cards = len(Cards.group_cards(relevant_cards, by="colour")[colour])
-            if have_n_cards == 5:
-                return 1.0
-            if have_n_cards == 4:
-                return self.get_table_value(pt.BetType.FLUSH_HAVE_4)
-            if have_n_cards == 3:
-                return self.get_table_value(pt.BetType.FOUR_HAVE_3)
-            if have_n_cards == 2:
-                return self.get_table_value(pt.BetType.FLUSH_HAVE_2)
-            if have_n_cards == 1:
-                return self.get_table_value(pt.BetType.FOUR_HAVE_1)
-            return self.get_table_value(pt.BetType.FLUSH)
+            return self.get_flush_prob(action_id)
 
         elif action_id in range(84, 88):
-            # Great flush
-            colour = self.card_colour_for_bet[action_id]
-            have_n_cards = len(self.cards.with_colour[colour])
-            if have_n_cards == 6:
-                return 1.0
-            if have_n_cards == 5:
-                return self.get_table_value(pt.BetType.FLUSH_HAVE_4)
-            if have_n_cards == 4:
-                return self.get_table_value(pt.BetType.FOUR_HAVE_3)
-            if have_n_cards == 3:
-                return self.get_table_value(pt.BetType.FLUSH_HAVE_2)
-            if have_n_cards == 2:
-                return self.get_table_value(pt.BetType.FOUR_HAVE_1)
-            if have_n_cards == 1:
-                return self.get_table_value(pt.BetType.FLUSH)
-            return self.get_table_value(pt.BetType.FLUSH_GREAT)
+            return self.get_great_flush_prob(action_id)
         else:
             raise ValueError("action_id must be from 0 to 87 (inclusive)")
+
+    def get_highcard_prob(self, action_id):
+        # High card
+        if action_id in self.cards.values:
+            return 1.0
+        else:
+            return self.get_table_value("highcard")
+
+    def get_pair_prob(self, action_id):
+        # Pair
+        value = self.card_values_for_bet[action_id][0]
+        if len(self.cards.with_value[value]) >= 2:
+            return 1.0
+        if len(self.cards.with_value[value]) == 1:
+            return self.get_table_value(pt.BetType.PAIR_HAVE_1)
+        return self.get_table_value(pt.BetType.PAIR)
+
+    def get_twopairs_prob(self, action_id):
+        # Two pairs
+        value_1, value_2 = self.card_values_for_bet[action_id]
+        value_1_num = len(self.cards.with_value[value_1])
+        value_2_num = len(self.cards.with_value[value_2])
+        if value_1_num >= 2 and value_2_num >= 2:
+            return 1.0
+        if value_1_num >= 2 and value_2_num == 1:
+            return self.get_table_value(pt.BetType.PAIR_HAVE_1)
+        if value_1_num == 1 and value_2_num >= 2:
+            return self.get_table_value(pt.BetType.PAIR_HAVE_1)
+        if value_1_num >= 2 and value_2_num == 0:
+            return self.get_table_value(pt.BetType.PAIR)
+        if value_1_num == 0 and value_2_num >= 2:
+            return self.get_table_value(pt.BetType.PAIR)
+        if value_1_num == 1 and value_2_num == 1:
+            return self.get_table_value(pt.BetType.TWOPAIRS_HAVE_1_HAVE_1)
+        if value_1_num == 1 and value_2_num == 0:
+            return self.get_table_value(pt.BetType.TWOPAIRS_HAVE_1)
+        if value_1_num == 0 and value_2_num == 1:
+            return self.get_table_value(pt.BetType.TWOPAIRS_HAVE_1)
+        return self.get_table_value(pt.BetType.TWOPAIRS)
+
+    def get_straight_prob(self, action_id):
+        # Small straight & Big straight
+        have_n_cards = sum([bool(self.cards.with_value[value]) for value in self.card_values_for_bet[action_id]])
+        if have_n_cards == 5:
+            return 1.0
+        if have_n_cards == 4:
+            return self.get_table_value(pt.BetType.STRAIGHT_HAVE_4)
+        if have_n_cards == 3:
+            return self.get_table_value(pt.BetType.STRAIGHT_HAVE_3)
+        if have_n_cards == 2:
+            return self.get_table_value(pt.BetType.STRAIGHT_HAVE_2)
+        if have_n_cards == 1:
+            return self.get_table_value(pt.BetType.STRAIGHT_HAVE_1)
+        return self.get_table_value(pt.BetType.STRAIGHT)
+
+    def get_great_straight_prob(self, action_id):
+        # Great straight
+        have_n_cards = sum([bool(self.cards.with_value[value]) for value in self.cards.with_value])
+        if have_n_cards == 6:
+            return 1.0
+        if have_n_cards == 5:
+            return self.get_table_value(pt.BetType.STRAIGHT_HAVE_4)
+        if have_n_cards == 4:
+            return self.get_table_value(pt.BetType.STRAIGHT_HAVE_3)
+        if have_n_cards == 3:
+            return self.get_table_value(pt.BetType.STRAIGHT_HAVE_2)
+        if have_n_cards == 2:
+            return self.get_table_value(pt.BetType.STRAIGHT_HAVE_1)
+        if have_n_cards == 1:
+            return self.get_table_value(pt.BetType.STRAIGHT)
+        raise ValueError("It's impossible to have no cards matching a great straight! (empty hand?)")
+
+    def get_three_prob(self, action_id):
+        # Three of a kind
+        value = self.card_values_for_bet[action_id][0]
+        if len(self.cards.with_value[value]) >= 3:
+            return 1.0
+        if len(self.cards.with_value[value]) == 2:
+            return self.get_table_value(pt.BetType.THREE_HAVE_2)
+        if len(self.cards.with_value[value]) == 1:
+            return self.get_table_value(pt.BetType.THREE_HAVE_1)
+        return self.get_table_value(pt.BetType.THREE)
+
+    def get_fullhouse_prob(self, action_id):
+        # Full house
+        value_1, value_2 = self.card_values_for_bet[action_id]
+        value_1_num = len(self.cards.with_value[value_1])
+        value_2_num = len(self.cards.with_value[value_2])
+        if value_1_num >= 3 and value_2_num >= 2:
+            return 1.0
+        if value_1_num == 2 and value_2_num == 2:
+            return self.get_table_value(pt.BetType.THREE_HAVE_2)
+        if value_1_num == 1 and value_2_num == 2:
+            return self.get_table_value(pt.BetType.THREE_HAVE_1)
+        if value_1_num == 0 and value_2_num == 2:
+            return self.get_table_value(pt.BetType.THREE)
+        if value_1_num >= 3 and value_2_num == 1:
+            return self.get_table_value(pt.BetType.PAIR_HAVE_1)
+        if value_1_num == 2 and value_2_num == 1:
+            return self.get_table_value(pt.BetType.FULLHOUSE_HAVE_2_AND_1)
+        if value_1_num == 1 and value_2_num == 1:
+            return self.get_table_value(pt.BetType.FULLHOUSE_HAVE_1_AND_1)
+        if value_1_num == 0 and value_2_num == 1:
+            return self.get_table_value(pt.BetType.FULLHOUSE_HAVE_0_AND_1)
+        if value_1_num >= 3 and value_2_num == 0:
+            return self.get_table_value(pt.BetType.PAIR)
+        if value_1_num == 2 and value_2_num == 0:
+            return self.get_table_value(pt.BetType.FULLHOUSE_HAVE_2_AND_0)
+        if value_1_num == 1 and value_2_num == 0:
+            return self.get_table_value(pt.BetType.FULLHOUSE_HAVE_1_AND_1)
+        return self.get_table_value(pt.BetType.FULLHOUSE)
+
+    def get_colour_prob(self, action_id):
+        # Colour
+        colour = self.card_colour_for_bet[action_id]
+        if len(self.cards.with_colour[colour]) >= 5:
+            return 1.0
+        if len(self.cards.with_colour[colour]) == 4:
+            return self.get_table_value(pt.BetType.COLOUR_HAVE_4)
+        if len(self.cards.with_colour[colour]) == 3:
+            return self.get_table_value(pt.BetType.COLOUR_HAVE_3)
+        if len(self.cards.with_colour[colour]) == 2:
+            return self.get_table_value(pt.BetType.COLOUR_HAVE_2)
+        if len(self.cards.with_colour[colour]) == 1:
+            return self.get_table_value(pt.BetType.COLOUR_HAVE_1)
+        return self.get_table_value(pt.BetType.COLOUR)
+
+    def get_four_prob(self, action_id):
+        # Four of a kind
+        value = self.card_values_for_bet[action_id][0]
+        if len(self.cards.with_value[value]) == 4:
+            return 1.0
+        if len(self.cards.with_value[value]) == 3:
+            return self.get_table_value(pt.BetType.FOUR_HAVE_3)
+        if len(self.cards.with_value[value]) == 2:
+            return self.get_table_value(pt.BetType.FOUR_HAVE_2)
+        if len(self.cards.with_value[value]) == 1:
+            return self.get_table_value(pt.BetType.FOUR_HAVE_1)
+        return self.get_table_value(pt.BetType.FOUR)
+
+    def get_flush_prob(self, action_id):
+        # Small flush & big flush
+        colour = self.card_colour_for_bet[action_id]
+        relevant_cards = [card for value in self.card_values_for_bet[action_id] for card in self.cards.with_value[value]]
+        have_n_cards = len(Cards.group_cards(relevant_cards, by="colour")[colour])
+        if have_n_cards == 5:
+            return 1.0
+        if have_n_cards == 4:
+            return self.get_table_value(pt.BetType.FLUSH_HAVE_4)
+        if have_n_cards == 3:
+            return self.get_table_value(pt.BetType.FOUR_HAVE_3)
+        if have_n_cards == 2:
+            return self.get_table_value(pt.BetType.FLUSH_HAVE_2)
+        if have_n_cards == 1:
+            return self.get_table_value(pt.BetType.FOUR_HAVE_1)
+        return self.get_table_value(pt.BetType.FLUSH)
+
+    def get_great_flush_prob(self, action_id):
+        # Great flush
+        colour = self.card_colour_for_bet[action_id]
+        have_n_cards = len(self.cards.with_colour[colour])
+        if have_n_cards == 6:
+            return 1.0
+        if have_n_cards == 5:
+            return self.get_table_value(pt.BetType.FLUSH_HAVE_4)
+        if have_n_cards == 4:
+            return self.get_table_value(pt.BetType.FOUR_HAVE_3)
+        if have_n_cards == 3:
+            return self.get_table_value(pt.BetType.FLUSH_HAVE_2)
+        if have_n_cards == 2:
+            return self.get_table_value(pt.BetType.FOUR_HAVE_1)
+        if have_n_cards == 1:
+            return self.get_table_value(pt.BetType.FLUSH)
+        return self.get_table_value(pt.BetType.FLUSH_GREAT)
