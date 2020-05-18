@@ -112,12 +112,8 @@ class Handler(object):
                 return self.get_table_value(pt.BetType.TWOPAIRS_HAVE_1)
             return self.get_table_value(pt.BetType.TWOPAIRS)
         elif action_id in {27, 28}:
-            if action_id == 27:
-                # Small straight
-                have_n_cards = sum([bool(self.cards.with_value[value]) for value in range(5)])
-            else:
-                # Big straight
-                have_n_cards = sum([bool(self.cards.with_value[value]) for value in range(1,6)])
+            # Small straight & Big straight
+            have_n_cards = sum([bool(self.cards.with_value[value]) for value in self.card_values_for_bet[action_id]])
             if have_n_cards == 5:
                 return 1.0
             if have_n_cards == 4:
