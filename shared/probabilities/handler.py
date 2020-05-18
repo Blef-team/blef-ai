@@ -2,14 +2,6 @@ import itertools
 import numpy as np
 from shared.probabilities import probability_table as pt
 
-class BetType(object):
-    """Class for constant storage - bet type string literals."""
-    HIGHCARD_HAVE_1 = "highcard_have_1"
-    PAIR = "pair"
-    PAIR_HAVE_1 = "pair_have_1"
-    TWO_PAIRS = "two_pairs"
-    TWO_PAIRS_HAVE_1 = "two_pairs_have_1"
-
 
 class Cards(object):
     """A class for card information storage."""
@@ -41,9 +33,10 @@ class Handler(object):
     def __init__(self):
         super(Handler, self).__init__()
         self.probs_table = pt.get()
-        bet_types = [attr for attr in dir(BetType) if not callable(getattr(BetType, attr)) and not attr.startswith("__")]
+        bet_types = [getattr(pt.BetType, attr) for attr in dir(pt.BetType) if not callable(getattr(pt.BetType, attr)) and not attr.startswith("__")]
         if not all(bet_type in self.probs_table.columns for bet_type in bet_types):
-            raise ValueError("The probability table is corrupted!")
+            print([(bet_type, bet_type in self.probs_table.columns) for bet_type in bet_types])
+            raise ValueError("The probability table is corrupted! Consider deleting the CSV.")
         self.card_values_for_bet = {0: [0], 1: [1], 2: [2], 3: [3], 4: [4], 5: [5], 6: [0], 7: [1], 8: [2], 9: [3], 10: [4], 11: [5], 12: [0, 1], 13: [0, 2], 14: [1, 2], 15: [0, 3], 16: [1, 3], 17: [2, 3], 18: [0, 4], 19: [1, 4], 20: [2, 4], 21: [3, 4], 22: [0, 5], 23: [1, 5], 24: [2, 5], 25: [3, 5], 26: [4, 5], 30: [0], 31: [1], 32: [2], 33: [3], 34: [4], 35: [5], 36: [0, 1], 37: [0, 2], 38: [0, 3], 39: [0, 4], 40: [5], 41: [1], 42: [1, 2], 43: [1, 3], 44: [1, 4], 45: [1, 5], 46: [0, 2], 47: [1, 2], 48: [2, 3], 49: [2, 4], 50: [2, 5], 51: [0, 3], 52: [1, 3], 53: [2, 3], 54: [3, 4], 55: [3, 5], 56: [0, 4], 57: [1, 4], 58: [2, 4], 59: [3, 4], 60: [4, 5], 61: [0, 5], 62: [1, 5], 63: [2, 5], 64: [3, 5], 65: [4, 5], 70: [0], 71: [1], 72: [2], 73: [3], 74: [4], 75: [5]}
 
     def get_probability_vector(self, cards=None, others_card_num=0):
@@ -74,28 +67,31 @@ class Handler(object):
             else:
                 return self.get_table_value("highcard")
         elif action_id in range(6, 12):
-            if len(self.cards.with_value[action_id - 6]) >= 2:
+            value = self.card_values_for_bet[action_id][0]
+            if len(self.cards.with_value[value]) >= 2:
                 return 1.0
-            if len(self.cards.with_value[action_id - 6]) == 1:
-                return self.get_table_value("pair_have_1")
-            return self.get_table_value(BetType.PAIR)
+            if len(self.cards.with_value[value]) == 1:
+                return self.get_table_value(pt.BetType.PAIR_HAVE_1)
+            return self.get_table_value(pt.BetType.PAIR)
         elif action_id in range(12, 27):
             value_1, value_2 = self.card_values_for_bet[action_id]
             if len(self.cards.with_value[value_1]) >= 2 and len(self.cards.with_value[value_2]) >= 2:
                 return 1.0
-            if len(self.cards.with_value[value_1]) >= 2 and len(self.cards.with_value[value_2]) == 0:
-                return self.get_table_value(BetType.PAIR)
-            if len(self.cards.with_value[value_1]) == 0 and len(self.cards.with_value[value_2]) >= 2:
-                return self.get_table_value(BetType.PAIR)
             if len(self.cards.with_value[value_1]) >= 2 and len(self.cards.with_value[value_2]) == 1:
-                return self.get_table_value(BetType.HIGHCARD_HAVE_1)
+                return self.get_table_value(pt.BetType.PAIR_HAVE_1)
             if len(self.cards.with_value[value_1]) == 1 and len(self.cards.with_value[value_2]) >= 2:
-                return self.get_table_value(BetType.HIGHCARD_HAVE_1)
+                return self.get_table_value(pt.BetType.PAIR_HAVE_1)
+            if len(self.cards.with_value[value_1]) >= 2 and len(self.cards.with_value[value_2]) == 0:
+                return self.get_table_value(pt.BetType.PAIR)
+            if len(self.cards.with_value[value_1]) == 0 and len(self.cards.with_value[value_2]) >= 2:
+                return self.get_table_value(pt.BetType.PAIR)
+            if len(self.cards.with_value[value_1]) == 1 and len(self.cards.with_value[value_2]) == 1:
+                return self.get_table_value(pt.BetType.TWOPAIRS_HAVE_1_HAVE_1)
             if len(self.cards.with_value[value_1]) == 1 and len(self.cards.with_value[value_2]) == 0:
-                return self.get_table_value(BetType.TWO_PAIRS_HAVE_1)
+                return self.get_table_value(pt.BetType.TWOPAIRS_HAVE_1)
             if len(self.cards.with_value[value_1]) == 0 and len(self.cards.with_value[value_2]) == 1:
-                return self.get_table_value(BetType.TWO_PAIRS_HAVE_1)
-            return self.get_table_value(BetType.TWO_PAIRS)
+                return self.get_table_value(pt.BetType.TWOPAIRS_HAVE_1)
+            return self.get_table_value(pt.BetType.TWOPAIRS)
 
 
         else:

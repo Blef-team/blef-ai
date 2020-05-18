@@ -5,6 +5,48 @@ import pandas as pd
 import numpy as np
 
 
+class BetType(object):
+    """
+        Class for constant storage -
+        bet type string literals for use with the probability table
+    """
+    HIGHCARD = "highcard"
+    PAIR_HAVE_1 = "pair_have_1"
+    THREE_HAVE_2 = "three_have_2"
+    FOUR_HAVE_3 = "four_have_3"
+    PAIR = "pair"
+    THREE_HAVE_1 = "three_have_1"
+    FOUR_HAVE_2 = "four_have_2"
+    TWOPAIRS = "twopairs"
+    TWOPAIRS_HAVE_1 = "twopairs_have_1"
+    TWOPAIRS_HAVE_1_HAVE_1 = "twopairs_have_1_have_1"
+    THREE = "three"
+    FOUR_HAVE_1 = "four_have_1"
+    FOUR = "four"
+    COLOUR = "colour"
+    COLOUR_HAVE_1 = "colour_have_1"
+    COLOUR_HAVE_2 = "colour_have_2"
+    COLOUR_HAVE_3 = "colour_have_3"
+    COLOUR_HAVE_4 = "colour_have_4"
+    STRAIGHT = "straight"
+    STRAIGHT_HAVE_1 = "straight_have_1"
+    STRAIGHT_HAVE_2 = "straight_have_2"
+    STRAIGHT_HAVE_3 = "straight_have_3"
+    STRAIGHT_HAVE_4 = "straight_have_4"
+    FLUSH = "flush"
+    FLUSH_HAVE_1 = "flush_have_1"
+    FLUSH_HAVE_2 = "flush_have_2"
+    FLUSH_HAVE_3 = "flush_have_3"
+    FLUSH_HAVE_4 = "flush_have_4"
+    FLUSH_GREAT = "flush_great"
+    FULLHOUSE = "fullhouse"
+    FULLHOUSE_HAVE_1_AND_0 = "fullhouse_have_1_and_0"
+    FULLHOUSE_HAVE_2_AND_0 = "fullhouse_have_2_and_0"
+    FULLHOUSE_HAVE_0_AND_1 = "fullhouse_have_0_and_1"
+    FULLHOUSE_HAVE_1_AND_1 = "fullhouse_have_1_and_1"
+    FULLHOUSE_HAVE_2_AND_1 = "fullhouse_have_2_and_1"
+
+
 def generate(filename="bet_probabilities.csv"):
     """
         Generate a dataframe of conditional probabilities
@@ -31,42 +73,52 @@ def generate(filename="bet_probabilities.csv"):
             frequency = sum([binom(4, i) * binom(24-n-4, o-i) for i in range(1, 5)])
             highcard_prob = frequency / all_states
 
-            # High card have 1
+            # Pair have 1
             frequency = sum([binom(3, i) * binom(24-n-3, o-i) for i in range(1, 4)])
-            highcard_have_1_prob = frequency / all_states
+            pair_have_1_prob = frequency / all_states
 
-            # High card have 2
+            # Three have 2
             frequency = sum([binom(2, i) * binom(24-n-2, o-i) for i in range(1, 3)])
-            highcard_have_2_prob = frequency / all_states
+            three_have_2_prob = frequency / all_states
 
-            # High card have 3
+            # Four have 3
             frequency = binom(24-n-1, o-1)
-            highcard_have_3_prob = frequency / all_states
+            four_have_3_prob = frequency / all_states
 
             # Pair
             frequency = sum([binom(4, i) * binom(24-n-4, o-i) for i in range(2, 5)])
             pair_prob = frequency / all_states
 
-            # Pair have 1
+            # Three have 1
             frequency = sum([binom(3, i) * binom(24-n-3, o-i) for i in range(2, 4)])
-            pair_have_1_prob = frequency / all_states
+            three_have_1_prob = frequency / all_states
 
-            # Pair have 2
+            # Four have 2
             frequency = binom(24-n-2, o-2)
-            pair_have_2_prob = frequency / all_states
+            four_have_2_prob = frequency / all_states
 
             # Two pairs
             occurance_combinations = product(range(2, 5), range(2, 5))
             frequency = sum([binom(4, c1)*binom(4, c2)*binom(24-n-8, o-c1-c2) for c1, c2 in occurance_combinations])
             twopairs_prob = frequency / all_states
 
+            # Two pairs have 1
+            occurance_combinations = product(range(1, 4), range(2, 5))
+            frequency = sum([binom(3, c1)*binom(4, c2)*binom(24-n-7, o-c1-c2) for c1, c2 in occurance_combinations])
+            twopairs_have_1_prob = frequency / all_states
+
+            # Two pairs have 1 have 1
+            occurance_combinations = product(range(1, 4), range(1, 4))
+            frequency = sum([binom(3, c1)*binom(3, c2)*binom(24-n-6, o-c1-c2) for c1, c2 in occurance_combinations])
+            twopairs_have_1_have_1_prob = frequency / all_states
+
             # Three
             frequency = binom(4, 3) * binom(24-n-4, o-3) + binom(4,4) * binom(24-n-4, o-4)
             three_prob = frequency / all_states
 
-            # Three have 1
+            # Four have 1
             frequency = binom(24-n-3, o-3)
-            three_have_1_prob = frequency / all_states
+            four_have_1_prob = frequency / all_states
 
             # Four
             frequency = binom(24-n-4, o-4)
@@ -205,39 +257,41 @@ def generate(filename="bet_probabilities.csv"):
 
             row = {
                 "index": index,
-                "highcard": highcard_prob,
-                "highcard_have_1": highcard_have_1_prob,
-                "highcard_have_2": highcard_have_2_prob,
-                "highcard_have_3": highcard_have_3_prob,
-                "pair": pair_prob,
-                "pair_have_1": pair_have_1_prob,
-                "pair_have_2": pair_have_2_prob,
-                "twopairs": twopairs_prob,
-                "three": three_prob,
-                "three_have_1": three_have_1_prob,
-                "four": four_prob,
-                "colour": colour_prob,
-                "colour_have_1": colour_have_1_prob,
-                "colour_have_2": colour_have_2_prob,
-                "colour_have_3": colour_have_3_prob,
-                "colour_have_4": colour_have_4_prob,
-                "straight": straight_prob,
-                "straight_have_1": straight_have_1_prob,
-                "straight_have_2": straight_have_2_prob,
-                "straight_have_3": straight_have_3_prob,
-                "straight_have_4": straight_have_4_prob,
-                "flush": flush_prob,
-                "flush_have_1": flush_have_1_prob,
-                "flush_have_2": flush_have_2_prob,
-                "flush_have_3": flush_have_3_prob,
-                "flush_have_4": flush_have_4_prob,
-                "flush_great": flush_great_prob,
-                "fullhouse": fullhouse_prob,
-                "fullhouse_have_1_and_0": fullhouse_have_1_and_0_prob,
-                "fullhouse_have_2_and_0": fullhouse_have_2_and_0_prob,
-                "fullhouse_have_0_and_1": fullhouse_have_0_and_1_prob,
-                "fullhouse_have_1_and_1": fullhouse_have_1_and_1_prob,
-                "fullhouse_have_2_and_1": fullhouse_have_2_and_1_prob
+                BetType.HIGHCARD: highcard_prob,
+                BetType.PAIR_HAVE_1: pair_have_1_prob,
+                BetType.THREE_HAVE_2: three_have_2_prob,
+                BetType.FOUR_HAVE_3: four_have_3_prob,
+                BetType.PAIR: pair_prob,
+                BetType.THREE_HAVE_1: three_have_1_prob,
+                BetType.FOUR_HAVE_2: four_have_2_prob,
+                BetType.TWOPAIRS: twopairs_prob,
+                BetType.TWOPAIRS_HAVE_1: twopairs_have_1_prob,
+                BetType.TWOPAIRS_HAVE_1_HAVE_1: twopairs_have_1_have_1_prob,
+                BetType.THREE: three_prob,
+                BetType.FOUR_HAVE_1: four_have_1_prob,
+                BetType.FOUR: four_prob,
+                BetType.COLOUR: colour_prob,
+                BetType.COLOUR_HAVE_1: colour_have_1_prob,
+                BetType.COLOUR_HAVE_2: colour_have_2_prob,
+                BetType.COLOUR_HAVE_3: colour_have_3_prob,
+                BetType.COLOUR_HAVE_4: colour_have_4_prob,
+                BetType.STRAIGHT: straight_prob,
+                BetType.STRAIGHT_HAVE_1: straight_have_1_prob,
+                BetType.STRAIGHT_HAVE_2: straight_have_2_prob,
+                BetType.STRAIGHT_HAVE_3: straight_have_3_prob,
+                BetType.STRAIGHT_HAVE_4: straight_have_4_prob,
+                BetType.FLUSH: flush_prob,
+                BetType.FLUSH_HAVE_1: flush_have_1_prob,
+                BetType.FLUSH_HAVE_2: flush_have_2_prob,
+                BetType.FLUSH_HAVE_3: flush_have_3_prob,
+                BetType.FLUSH_HAVE_4: flush_have_4_prob,
+                BetType.FLUSH_GREAT: flush_great_prob,
+                BetType.FULLHOUSE: fullhouse_prob,
+                BetType.FULLHOUSE_HAVE_1_AND_0: fullhouse_have_1_and_0_prob,
+                BetType.FULLHOUSE_HAVE_2_AND_0: fullhouse_have_2_and_0_prob,
+                BetType.FULLHOUSE_HAVE_0_AND_1: fullhouse_have_0_and_1_prob,
+                BetType.FULLHOUSE_HAVE_1_AND_1: fullhouse_have_1_and_1_prob,
+                BetType.FULLHOUSE_HAVE_2_AND_1: fullhouse_have_2_and_1_prob
             }
 
             assert all(map(lambda x: (row[x] <= 1.0 or np.isnan(row[x]) or x == "index"), row)) # Probabilities need to <= 1.0
