@@ -8,6 +8,7 @@ class Cards(object):
 
     def __init__(self, cards):
         super(Cards, self).__init__()
+        cards = sorted(cards) # itertools.groupby won't work if cards not sorted
         self.__raw = cards
         self.values = set(list(zip(*cards))[0])
         self.colours = set(list(zip(*cards))[1])
