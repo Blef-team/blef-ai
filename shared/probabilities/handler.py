@@ -130,6 +130,16 @@ class Handler(object):
             if have_n_cards == 1:
                 return self.get_table_value(pt.BetType.STRAIGHT)
             raise ValueError("It's impossible to have no cards matching a great straight! (empty hand?)")
+        elif action_id in range(30, 36):
+            # Three
+            value = self.card_values_for_bet[action_id][0]
+            if len(self.cards.with_value[value]) >= 3:
+                return 1.0
+            if len(self.cards.with_value[value]) == 2:
+                return self.get_table_value(pt.BetType.THREE_HAVE_2)
+            if len(self.cards.with_value[value]) == 1:
+                return self.get_table_value(pt.BetType.THREE_HAVE_1)
+            return self.get_table_value(pt.BetType.THREE)
 
         else:
             return 0.0
