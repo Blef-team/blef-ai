@@ -67,7 +67,7 @@ class Handler(object):
 
     def get_table_value(self, column):
         index = len(self.cards)*100 + self.others_card_num
-        return self.probs_table.loc[[index], [column]].values[0]
+        return self.probs_table.at[index, column]
 
     def get_bet_prob(self, action_id):
         try:
