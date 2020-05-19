@@ -60,6 +60,8 @@ class GameManager(object):
     def __init__(self, base_url="http://localhost:8002/v3/"):
         super(GameManager, self).__init__()
         self.base_url = base_url
+        self.game_uuid = None
+        self.player_uuid = None
 
     def create_game(self):
         url = self.base_url + "games/create"
@@ -77,18 +79,36 @@ class GameManager(object):
                     pass
         return succeeded, game_uuid
 
-    def get_game_state(self, game_uuid, player_uuid):
-        if not isinstance(game_uuid, UUID) or not isinstance(player_uuid, UUID):
-            raise TypeError("game_uuid and player_uuid must be type uuid.UUID")
-        url = self.base_url + "games/{}?player_uuid={}".format(str(game_uuid), str(player_uuid))
+    def get_game_state(self, game_uuid=None, player_uuid=None):
+        self.update_game_uuid(game_uuid)
+        self.update_player_uuid(player_uuid)
+
+        url = self.base_url + "games/{}?player_uuid={}".format(str(self.game_uuid), str(self.player_uuid))
         print(url)
         succeeded = False
         game_state = None
         response = requests.get(url)
         if response.status_code == 200:
             response_obj = response.json()
-            print(game_state)
             if response_obj and GAME_STATE_VALIDATOR.is_valid(response_obj):
                 game_state = response_obj
                 succeeded = True
         return succeeded, game_state
+
+    def update_game_uuid(self, game_uuid):
+        if game_uuid is not None:
+            if isinstance(game_uuid, UUID):
+                self.game_uuid = game_uuid
+            else:
+                print("Provided game_uuid is not valid and will be ignored.")
+        if self.game_uuid is None or not isinstance(self.game_uuid, UUID):
+            raise TypeError("game_uuid is required and must be type uuid.UUID")
+
+    def update_player_uuid(self, player_uuid):
+        if player_uuid is not None:
+            if isinstance(player_uuid, UUID):
+                self.player_uuid = player_uuid
+            else:
+                print("Provided player_uuid is not valid and will be ignored.")
+        if self.player_uuid is None or not isinstance(self.player_uuid, UUID):
+            raise TypeError("player_uuid is required and must be type uuid.UUID")
