@@ -153,31 +153,36 @@ def generate(filename="bet_probabilities.csv"):
             colour_have_4_prob = frequency / all_states
 
             # Straight
-            frequency = pow(binom(4, 1), 5) * binom(24-n-5*4, o-5)
+            occurance_combinations = product(range(1, 5), range(1, 5), range(1, 5), range(1, 5), range(1, 5))
+            frequency = sum([binom(4, c1)*binom(4, c2)*binom(4, c3)*binom(4, c4)*binom(4, c5)*binom(24-n-5*4, o-c1-c2-c3-c4-c5) for c1, c2, c3, c4, c5 in occurance_combinations])
             straight_prob = frequency / all_states
 
             # Straight have 1
             frequency = 0
             if n >= 1:
-                frequency = pow(binom(4, 1), 4) * binom(24-n-4*4, o-4)
+                occurance_combinations = product(range(1, 5), range(1, 5), range(1, 5), range(1, 5))
+                frequency = sum([binom(4, c1)*binom(4, c2)*binom(4, c3)*binom(4, c4)*binom(24-n-4*4, o-c1-c2-c3-c4) for c1, c2, c3, c4 in occurance_combinations])
             straight_have_1_prob = frequency / all_states
 
             # Straight have 2
             frequency = 0
             if n >= 2:
-                frequency = pow(binom(4, 1), 3) * binom(24-n-3*4, o-3)
+                occurance_combinations = product(range(1, 5), range(1, 5), range(1, 5))
+                frequency = sum([binom(4, c1)*binom(4, c2)*binom(4, c3)*binom(24-n-3*4, o-c1-c2-c3) for c1, c2, c3 in occurance_combinations])
             straight_have_2_prob = frequency / all_states
 
             # Straight have 3
             frequency = 0
             if n >= 3:
-                frequency = pow(binom(4, 1), 2) * binom(24-n-2*4, o-2)
+                occurance_combinations = product(range(1, 5), range(1, 5))
+                frequency = sum([binom(4, c1)*binom(4, c2)*binom(24-n-2*4, o-c1-c2) for c1, c2 in occurance_combinations])
             straight_have_3_prob = frequency / all_states
 
             # Straight have 4
             frequency = 0
             if n >= 4:
-                frequency = binom(4, 1) * binom(24-n-1*4, o-1)
+                occurance_combinations = range(1, 5)
+                frequency = sum([binom(4, c1)*binom(24-n-4, o-c1) for c1 in occurance_combinations])
             straight_have_4_prob = frequency / all_states
 
             # Flush
