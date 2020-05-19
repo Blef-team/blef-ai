@@ -217,7 +217,7 @@ class Handler(object):
         if value_1_num == 2 and value_2_num == 0:
             return self.get_table_value(pt.BetType.FULLHOUSE_HAVE_2_AND_0)
         if value_1_num == 1 and value_2_num == 0:
-            return self.get_table_value(pt.BetType.FULLHOUSE_HAVE_1_AND_1)
+            return self.get_table_value(pt.BetType.FULLHOUSE_HAVE_1_AND_0)
         return self.get_table_value(pt.BetType.FULLHOUSE)
 
     def get_colour_prob(self, action_id):
