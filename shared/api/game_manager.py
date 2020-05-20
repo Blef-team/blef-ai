@@ -65,9 +65,14 @@ class GameManager(object):
         self.test_connection()
 
     def test_connection(self):
+        connected = False
         try:
-            response = requests.get(self.base_url)
-        except requests.exceptions.ConnectionError as error:
+            response = requests.get(self.base_url+"games")
+            if response.response_code == 200:
+                connected = True
+        except requests.exceptions.ConnectionError:
+            pass
+        if not connected:
             raise ConnectionError("base_url ({}) is not reachable".format(self.base_url))
 
     def create_game(self):
