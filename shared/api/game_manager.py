@@ -68,6 +68,7 @@ GAME_STATE_SCHEMA = {
 Draft6Validator.check_schema(GAME_STATE_SCHEMA)
 GAME_STATE_VALIDATOR = Draft6Validator(GAME_STATE_SCHEMA)
 
+
 class GameManager(object):
     """Manager of API calls to the Blef Game Engine Service."""
 
@@ -106,6 +107,7 @@ class GameManager(object):
         return succeeded, game_uuid
 
     def join_game(self, game_uuid, nickname):
+        self.update_game_uuid(game_uuid)
         url = self.base_url + "games/{}/join?nickname={}".format(str(self.game_uuid), nickname)
         succeeded = False
         player_uuid = None
@@ -117,6 +119,8 @@ class GameManager(object):
                 try:
                     player_uuid = UUID(uuid)
                     succeeded = True
+                    self.game_uuid = game_uuid
+                    self.player_uuid = player_uuid
                 except:
                     pass
         return succeeded, player_uuid
