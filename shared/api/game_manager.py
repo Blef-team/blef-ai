@@ -82,7 +82,7 @@ class GameManager(object):
         connected = False
         try:
             response = requests.get(self.base_url+"games")
-            if response.response_code == 200:
+            if response.status_code == 200:
                 connected = True
         except requests.exceptions.ConnectionError:
             pass
