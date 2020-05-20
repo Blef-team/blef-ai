@@ -55,7 +55,7 @@ class Agent(object):
                 continue
             hand = [(card["value"], card["colour"]) for card in matching_hands[0]["hand"]]
             players = game_state.get("players", [])
-            others_card_num = sum([player.get("n_cards") for player in players if player.get("n_cards", self.nickname) != self.nickname])
+            others_card_num = sum([player.get("n_cards") for player in players if player.get("nickname", self.nickname) != self.nickname])
             if not players or not others_card_num:
                 print("Can't get my hand or other player's card numbers from the game state.")
                 continue
