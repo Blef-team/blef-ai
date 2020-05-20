@@ -43,10 +43,24 @@ GAME_STATE_SCHEMA = {
                                     }
                                 }
                             }
-                            }
                         }
+                    }
+                }
+            },
+        "history": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "action_id": {
+                        "type": "integer"
+                        },
+                    "nickname": {
+                        "type": "string"
+                    }
                 }
             }
+        }
 
     },
     "required": ["players", "hands"]
@@ -96,7 +110,6 @@ class GameManager(object):
         self.update_player_uuid(player_uuid)
 
         url = self.base_url + "games/{}?player_uuid={}".format(str(self.game_uuid), str(self.player_uuid))
-        print(url)
         succeeded = False
         game_state = None
         response = requests.get(url)
