@@ -13,7 +13,7 @@ class ConservativeAgent(agent.Agent):
 
     def __init__(self, base_url=None):
         super(ConservativeAgent, self).__init__(base_url)
-        self.nickname = "Honorable_Gentleman"
+        self.nickname = "Honourable_Gentleman"
 
     def run(self):
         """
