@@ -105,6 +105,22 @@ class GameManager(object):
                     pass
         return succeeded, game_uuid
 
+    def join_game(self, game_uuid, nickname):
+        url = self.base_url + "games/{}/join?nickname={}".format(str(self.game_uuid), nickname)
+        succeeded = False
+        player_uuid = None
+        response = requests.get(url)
+        if response.status_code == 200:
+            json = response.json()
+            uuid = json.get("player_uuid")
+            if uuid:
+                try:
+                    player_uuid = UUID(uuid)
+                    succeeded = True
+                except:
+                    pass
+        return succeeded, player_uuid
+
     def get_game_state(self, game_uuid=None, player_uuid=None):
         self.update_game_uuid(game_uuid)
         self.update_player_uuid(player_uuid)
