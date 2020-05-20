@@ -138,6 +138,17 @@ class GameManager(object):
                 succeeded = True
         return succeeded
 
+    def play(self, action_id, game_uuid=None, player_uuid=None):
+        self.update_game_uuid(game_uuid)
+        self.update_player_uuid(player_uuid)
+
+        url = self.base_url + "games/{}/play?player_uuid={}&action_id={}".format(str(self.game_uuid), str(self.player_uuid), action_id)
+        succeeded = False
+        response = requests.get(url)
+        if response.status_code == 200:
+            succeeded = True
+        return succeeded
+
     def get_game_state(self, game_uuid=None, player_uuid=None):
         self.update_game_uuid(game_uuid)
         self.update_player_uuid(player_uuid)
