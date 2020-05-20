@@ -174,6 +174,10 @@ class GameManager(object):
         return succeeded
 
     def get_game_state(self, game_uuid=None, player_uuid=None):
+        """
+            Call the Game Engine Service /games/{id} endpoint
+            return: succeeded(bool), game_state(dict)
+        """
         self.update_game_uuid(game_uuid)
         self.update_player_uuid(player_uuid)
 
