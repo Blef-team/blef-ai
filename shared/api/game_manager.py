@@ -74,21 +74,26 @@ class GameManager(object):
 
     def __init__(self, base_url="http://localhost:8002/v2.1/"):
         super(GameManager, self).__init__()
+        if not isinstance(base_url, str):
+            raise TypeError("base_url must be a string")
         self.base_url = base_url
         self.game_uuid = None
         self.player_uuid = None
         self.test_connection()
 
     def test_connection(self):
-        connected = False
         try:
             response = requests.get(self.base_url+"games")
-            if response.status_code == 200:
-                connected = True
+            if response.status_code != 200:
+                ConnectionError("base_url is not a valid base path of a running game engine")
         except requests.exceptions.ConnectionError:
-            pass
-        if not connected:
             raise ConnectionError("base_url ({}) is not reachable".format(self.base_url))
+        except requests.exceptions.InvalidURL:
+            raise ValueError("base_url must be a valid URL")
+        except requests.exceptions.InvalidSchema:
+            raise ValueError("base_url must start with http://")
+
+
 
     def create_game(self):
         url = self.base_url + "games/create"
