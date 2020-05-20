@@ -82,6 +82,10 @@ class GameManager(object):
         self.test_connection()
 
     def test_connection(self):
+        """
+            Test whether it's possible to reach a valid
+            Game Engine Service at self.base_url
+        """
         try:
             response = requests.get(self.base_url+"games")
             if response.status_code != 200:
@@ -93,9 +97,11 @@ class GameManager(object):
         except requests.exceptions.InvalidSchema:
             raise ValueError("base_url must start with http://")
 
-
-
     def create_game(self):
+        """
+            Call the Game Engine Service /create endpoint
+            return: succeeded(bool), game_uuid(uuid.UUID)
+        """
         url = self.base_url + "games/create"
         succeeded = False
         game_uuid = None
@@ -112,6 +118,11 @@ class GameManager(object):
         return succeeded, game_uuid
 
     def join_game(self, game_uuid, nickname):
+        """
+            Call the Game Engine Service /games/{id}/join endpoint
+            store uuids in the object.
+            return: succeeded(bool), player_uuid(uuid.UUID)
+        """
         self.update_game_uuid(game_uuid)
         url = self.base_url + "games/{}/join?nickname={}".format(str(self.game_uuid), nickname)
         succeeded = False
@@ -131,6 +142,10 @@ class GameManager(object):
         return succeeded, player_uuid
 
     def start_game(self, game_uuid=None, player_uuid=None):
+        """
+            Call the Game Engine Service /games/{id}/start endpoint
+            return: succeeded(bool)
+        """
         self.update_game_uuid(game_uuid)
         self.update_player_uuid(player_uuid)
         url = self.base_url + "games/{}/start?admin_uuid={}".format(str(self.game_uuid), str(self.player_uuid))
@@ -144,6 +159,10 @@ class GameManager(object):
         return succeeded
 
     def play(self, action_id, game_uuid=None, player_uuid=None):
+        """
+            Call the Game Engine Service /games/{id}/play endpoint
+            return: succeeded(bool)
+        """
         self.update_game_uuid(game_uuid)
         self.update_player_uuid(player_uuid)
 
@@ -170,6 +189,9 @@ class GameManager(object):
         return succeeded, game_state
 
     def update_game_uuid(self, game_uuid):
+        """
+            Handle validating and storing game_uuid
+        """
         if game_uuid is not None:
             if isinstance(game_uuid, UUID):
                 self.game_uuid = game_uuid
@@ -179,6 +201,9 @@ class GameManager(object):
             raise TypeError("game_uuid is required and must be type uuid.UUID")
 
     def update_player_uuid(self, player_uuid):
+        """
+            Handle validating and storing player_uuid
+        """
         if player_uuid is not None:
             if isinstance(player_uuid, UUID):
                 self.player_uuid = player_uuid
