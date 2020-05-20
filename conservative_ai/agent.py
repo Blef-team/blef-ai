@@ -7,7 +7,7 @@ class Agent(object):
 
     def __init__(self, base_url=None):
         super(Agent, self).__init__()
-        self.nickname = "Honorable Gentleman"
+        self.nickname = "Honorable_Gentleman"
         if base_url is not None:
             self.game_manager = game_manager.GameManager(base_url)
         else:
