@@ -125,6 +125,19 @@ class GameManager(object):
                     pass
         return succeeded, player_uuid
 
+    def start_game(self, game_uuid=None, player_uuid=None):
+        self.update_game_uuid(game_uuid)
+        self.update_player_uuid(player_uuid)
+        url = self.base_url + "games/{}/start?admin_uuid={}".format(str(self.game_uuid), str(self.player_uuid))
+        succeeded = False
+        response = requests.get(url)
+        if response.status_code == 202:
+            json = response.json()
+            message = json.get("message")
+            if message == "Game started":
+                succeeded = True
+        return succeeded
+
     def get_game_state(self, game_uuid=None, player_uuid=None):
         self.update_game_uuid(game_uuid)
         self.update_player_uuid(player_uuid)
