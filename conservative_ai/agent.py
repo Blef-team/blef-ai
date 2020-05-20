@@ -5,10 +5,13 @@ from shared.probabilities import handler
 class Agent(object):
     """Autonomous AI Agent class to play Blef."""
 
-    def __init__(self, base_url):
+    def __init__(self, base_url=None):
         super(Agent, self).__init__()
         self.nickname = "Honorable Gentleman"
-        self.game_manager = game_manager.GameManager(base_url)
+        if base_url is not None:
+            self.game_manager = game_manager.GameManager(base_url)
+        else:
+            self.game_manager = game_manager.GameManager()
         self.prob_handler = handler.Handler()
 
     def join_game(self, game_uuid, nickname=None):
