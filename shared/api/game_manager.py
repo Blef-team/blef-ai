@@ -57,11 +57,18 @@ GAME_STATE_VALIDATOR = Draft6Validator(GAME_STATE_SCHEMA)
 class GameManager(object):
     """Manager of API calls to the Blef Game Engine Service."""
 
-    def __init__(self, base_url="http://localhost:8002/v3/"):
+    def __init__(self, base_url="http://localhost:8002/v2.1/"):
         super(GameManager, self).__init__()
         self.base_url = base_url
         self.game_uuid = None
         self.player_uuid = None
+        self.test_connection()
+
+    def test_connection(self):
+        try:
+            response = requests.get(self.base_url)
+        except requests.exceptions.ConnectionError as error:
+            raise ConnectionError("base_url ({}) is not reachable".format(self.base_url))
 
     def create_game(self):
         url = self.base_url + "games/create"
