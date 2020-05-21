@@ -1,3 +1,5 @@
+from time import sleep
+from multiprocessing import Process
 from shared.api.game_manager import GameManager
 from agent import ConservativeAgent
 
@@ -32,4 +34,18 @@ class Orchestrator(object):
         self.run_single_game(agents)
 
     def run_single_game(self, agents):
+        agent_jobs = []
+        for agent in agents:
+            p = Process(target=agent.run)
+            agent_jobs.append(p)
+            p.start()
+        done = False
+        while not done:
+            for agent_job in agent_jobs:
+                agent_job.join(timeout=0.1)
+                if agent_job.is_alive():
+                    sleep(0.1)
+                    break
+            else:
+                done = True
         print("All agents finished the game")
