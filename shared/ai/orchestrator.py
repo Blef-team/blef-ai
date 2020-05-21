@@ -21,9 +21,9 @@ class Orchestrator(object):
         admin_agent = ConservativeAgent(base_url=self.base_url)
         nonadmin_agents = [ConservativeAgent(base_url=self.base_url) for i in range(n_agents - 1)]
         for i in range(n_games):
-            n_agents = n_agents if n_agents else random.choice(range(2,9))
-            print("Orchestrating {} agents".format(n_agents))
-            self.orchestrate_single_game(n_agents=n_agents, admin_agent=admin_agent, nonadmin_agents=nonadmin_agents)
+            n_agents_value = n_agents if n_agents else random.choice(range(2,9))
+            print("Orchestrating {} agents".format(n_agents_value))
+            self.orchestrate_single_game(n_agents=n_agents_value, admin_agent=admin_agent, nonadmin_agents=nonadmin_agents)
 
     def orchestrate_single_game(self, n_agents=0, admin_agent=None, nonadmin_agents=None):
         if not isinstance(n_agents, int) or n_agents not in range(1,9):
