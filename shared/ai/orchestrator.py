@@ -1,3 +1,4 @@
+import random
 from time import sleep
 from multiprocessing import Process
 from shared.api.game_manager import GameManager
@@ -15,6 +16,11 @@ class Orchestrator(object):
         else:
             self.game_manager = GameManager()
         self.base_url = self.game_manager.base_url
+
+    def orchestrate_games(self, n_games=0, n_agents=0):
+        for i in range(n_games):
+            n_agents = n_agents if n_agents else random.choice(range(2,9))
+            self.orchestrate_single_game(n_agents=n_agents)
 
     def orchestrate_single_game(self, n_agents=2):
         if not isinstance(n_agents, int) or n_agents not in range(1,9):
