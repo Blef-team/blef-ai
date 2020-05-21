@@ -19,6 +19,9 @@ class ConservativeAgent(agent.Agent):
         """
             Play the game.
         """
+        if not self.joined_game:
+            print("I have not joined any game yet")
+            return
         done = False
         while not done:
             sleep(1) # DEBUG / DEV
