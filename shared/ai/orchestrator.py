@@ -22,7 +22,7 @@ class Orchestrator(object):
         nonadmin_agents = [ConservativeAgent(base_url=self.base_url) for i in range(n_agents - 1)]
         for i in range(n_games):
             n_agents = n_agents if n_agents else random.choice(range(2,9))
-            print(n_agents)
+            print("Orchestrating {} agents".format(n_agents))
             self.orchestrate_single_game(n_agents=n_agents, admin_agent=admin_agent, nonadmin_agents=nonadmin_agents)
 
     def orchestrate_single_game(self, n_agents=0, admin_agent=None, nonadmin_agents=None):
