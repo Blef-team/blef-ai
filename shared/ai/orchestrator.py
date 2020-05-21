@@ -18,15 +18,23 @@ class Orchestrator(object):
         self.base_url = self.game_manager.base_url
 
     def orchestrate_games(self, n_games=0, n_agents=0):
-        for i in range(n_games):
-            n_agents = n_agents if n_agents else random.choice(range(2,9))
-            self.orchestrate_single_game(n_agents=n_agents)
-
-    def orchestrate_single_game(self, n_agents=2):
-        if not isinstance(n_agents, int) or n_agents not in range(1,9):
-            raise ValueError("n_agents must be an integer from 1 to 8 (inclusive)")
         admin_agent = ConservativeAgent(base_url=self.base_url)
         nonadmin_agents = [ConservativeAgent(base_url=self.base_url) for i in range(n_agents - 1)]
+        for i in range(n_games):
+            n_agents = n_agents if n_agents else random.choice(range(2,9))
+            print(n_agents)
+            self.orchestrate_single_game(n_agents=n_agents, admin_agent=admin_agent, nonadmin_agents=nonadmin_agents)
+
+    def orchestrate_single_game(self, n_agents=0, admin_agent=None, nonadmin_agents=None):
+        if not isinstance(n_agents, int) or n_agents not in range(1,9):
+            if admin_agent and nonadmin_agents:
+                n_agents = len(nonadmin_agents) + 1
+            else:
+                raise ValueError("n_agents must be an integer from 1 to 8 (inclusive)")
+        if not admin_agent:
+            admin_agent = ConservativeAgent(base_url=self.base_url)
+        if not nonadmin_agents:
+            nonadmin_agents = [ConservativeAgent(base_url=self.base_url) for i in range(n_agents - 1)]
 
         succeeded, game_uuid = self.game_manager.create_game()
         admin_agent.join_game(game_uuid, "admin_bot", run=False)
