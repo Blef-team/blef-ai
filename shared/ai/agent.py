@@ -14,7 +14,7 @@ class Agent(object):
             self.game_manager = game_manager.GameManager()
         self.prob_handler = handler.Handler()
 
-    def join_game(self, game_uuid, nickname=None):
+    def join_game(self, game_uuid, nickname=None, run=True):
         """
             Join an existing game of Blef using GameManager.
             If successful, start playing the game.
@@ -23,6 +23,8 @@ class Agent(object):
         if isinstance(nickname, str) and len(nickname) > 0:
             self.nickname = nickname
         succeeded, _ = self.game_manager.join_game(game_uuid, self.nickname)
+        if not run:
+            return succeeded
         if succeeded:
             return self.run()
         return False
