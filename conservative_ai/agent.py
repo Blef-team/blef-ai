@@ -40,7 +40,6 @@ class ConservativeAgent(agent.Agent):
                 continue
 
             if game_state.get("cp_nickname") != self.nickname:
-                print("It's not my turn")
                 continue
 
             matching_hands = [hand for hand in game_state.get("hands", []) if hand.get("nickname") == self.nickname]
