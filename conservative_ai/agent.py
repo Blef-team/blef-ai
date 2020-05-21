@@ -24,7 +24,8 @@ class ConservativeAgent(agent.Agent):
             return
         done = False
         while not done:
-            sleep(3) # DEBUG / DEV
+            if not self.playing_locally:
+                sleep(3)
             succeeded, game_state = self.game_manager.get_game_state()
             if not succeeded:
                 print("Can't get the game state.")

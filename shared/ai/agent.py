@@ -14,6 +14,7 @@ class Agent(object):
             self.game_manager = game_manager.GameManager()
         self.prob_handler = handler.Handler()
         self.joined_game = False
+        self.playing_locally = self.game_manager.base_url.strip("http://").startswith("localhost")
 
     def join_game(self, game_uuid, nickname=None, run=True):
         """
