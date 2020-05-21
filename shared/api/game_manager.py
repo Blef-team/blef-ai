@@ -79,15 +79,16 @@ class GameManager(object):
         self.base_url = base_url
         self.game_uuid = None
         self.player_uuid = None
-        self.test_connection()
+        self.test_connection(base_url)
 
-    def test_connection(self):
+    @staticmethod
+    def test_connection(base_url):
         """
             Test whether it's possible to reach a valid
             Game Engine Service at self.base_url
         """
         try:
-            response = requests.get(self.base_url+"games")
+            response = requests.get(base_url+"games")
             if response.status_code != 200:
                 ConnectionError("base_url is not a valid base path of a running game engine")
         except requests.exceptions.ConnectionError:
