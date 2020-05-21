@@ -25,16 +25,14 @@ class Orchestrator(object):
     def orchestrate_single_game(self, n_agents=2):
         if not isinstance(n_agents, int) or n_agents not in range(1,9):
             raise ValueError("n_agents must be an integer from 1 to 8 (inclusive)")
-        admin_agent = ConservativeAgent(base_url = self.base_url)
-        nonadmin_agents = [ConservativeAgent(base_url = self.base_url) for i in range(n_agents - 1)]
+        admin_agent = ConservativeAgent(base_url=self.base_url)
+        nonadmin_agents = [ConservativeAgent(base_url=self.base_url) for i in range(n_agents - 1)]
 
         succeeded, game_uuid = self.game_manager.create_game()
         admin_agent.join_game(game_uuid, "admin_bot", run=False)
         for i, agent in enumerate(nonadmin_agents):
             agent.join_game(game_uuid, "bot_{}".format(i), run=False)
-        print("Will start game?")
         admin_agent.start_game()
-        print("Started game?")
 
         agents = nonadmin_agents + [admin_agent]
         self.run_single_game(agents)
