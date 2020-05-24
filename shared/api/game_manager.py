@@ -106,8 +106,6 @@ class GameManager(object):
             Call the Game Engine Service /create endpoint
             return: succeeded(bool), game_uuid(uuid.UUID)
         """
-
-    def create_game(self):
         if not self.playing_locally:
             sleep(1)
         url = self.base_url + "games/create"
@@ -147,7 +145,7 @@ class GameManager(object):
                     succeeded = True
                     self.game_uuid = game_uuid
                     self.player_uuid = player_uuid
-                except:
+                except (ValueError, AttributeError, TypeError):
                     pass
         return succeeded, player_uuid
 
