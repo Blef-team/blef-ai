@@ -1,4 +1,3 @@
-from time import sleep
 import numpy as np
 from shared.api import game_manager
 from shared.probabilities import handler
@@ -24,8 +23,6 @@ class ConservativeAgent(agent.Agent):
             return
         done = False
         while not done:
-            if not self.playing_locally:
-                sleep(3)
             succeeded, game_state = self.game_manager.get_game_state()
             if not succeeded:
                 print("Can't get the game state.")
