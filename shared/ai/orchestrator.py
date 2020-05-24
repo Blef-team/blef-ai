@@ -2,7 +2,7 @@ import random
 from time import sleep
 from multiprocessing import Process
 from shared.api.game_manager import GameManager
-from agent import ConservativeAgent
+from conservative_ai.agent import ConservativeAgent
 
 
 class Orchestrator(object):
