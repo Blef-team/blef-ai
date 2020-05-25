@@ -31,7 +31,7 @@ class ConservativeAgent(agent.Agent):
                 continue
 
             if game_state.get("status") != "Running":
-                if game_state.get("status") != "Finished":
+                if game_state.get("status") == "Not started":
                     print("Game not yet started")
                 else:
                     print("Game finished")
@@ -67,7 +67,10 @@ class ConservativeAgent(agent.Agent):
                     self.game_manager.play(88)
                     continue
 
-                check_vs_bet_probs = np.array([1-bet_probs[last_bet], sum(bet_probs**2) - bet_probs[last_bet]**2])
+                success_prob_of_check = 1-bet_probs[last_bet]
+                weighted_probs = bet_probs * (bet_probs/sum(bet_probs))
+                success_prob_of_bet = sum(weighted_probs) - weighted_probs[last_bet]
+                check_vs_bet_probs = np.array([success_prob_of_check, success_prob_of_bet])
                 check_vs_bet_probs **= 2  # Be conservative
                 if sum(check_vs_bet_probs) == 0:
                     self.game_manager.play(88)
