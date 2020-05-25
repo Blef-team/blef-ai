@@ -3,7 +3,7 @@ from shared.probabilities import handler
 
 
 class Agent(object):
-    """Bass/parent class for AI agents to play Blef."""
+    """Base/parent class for AI agents to play Blef."""
 
     def __init__(self, base_url=None):
         super(Agent, self).__init__()
