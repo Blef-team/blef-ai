@@ -68,8 +68,9 @@ class ConservativeAgent(agent.Agent):
                     continue
 
                 success_prob_of_check = 1-bet_probs[last_bet]
+                bet_probs[last_bet] = 0.0
                 weighted_probs = bet_probs * (bet_probs/sum(bet_probs))
-                success_prob_of_bet = sum(weighted_probs) - weighted_probs[last_bet]
+                success_prob_of_bet = sum(weighted_probs)
                 check_vs_bet_probs = np.array([success_prob_of_check, success_prob_of_bet])
                 check_vs_bet_probs **= 2  # Be conservative
                 if sum(check_vs_bet_probs) == 0:
