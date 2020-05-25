@@ -81,7 +81,6 @@ class GameManager(object):
         self.game_uuid = None
         self.player_uuid = None
         self.test_connection(base_url)
-        self.test_connection()
         self.playing_locally = base_url.strip("http://").startswith("localhost")
 
     @staticmethod
