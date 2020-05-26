@@ -31,6 +31,9 @@ class Agent(object):
             return self.run()
         return False
 
+    def start_game(self):
+        return self.game_manager.start_game()
+
     def run(self):
         """
             Stub function - overwrite in a child class

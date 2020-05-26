@@ -1,3 +1,4 @@
+from time import sleep
 import requests
 from uuid import UUID
 from jsonschema import Draft6Validator
@@ -80,6 +81,7 @@ class GameManager(object):
         self.game_uuid = None
         self.player_uuid = None
         self.test_connection(base_url)
+        self.playing_locally = base_url.strip("http://").startswith("localhost")
 
     @staticmethod
     def test_connection(base_url):
@@ -92,7 +94,7 @@ class GameManager(object):
             if response.status_code != 200:
                 ConnectionError("base_url is not a valid base path of a running game engine")
         except requests.exceptions.ConnectionError:
-            raise ConnectionError("base_url ({}) is not reachable".format(self.base_url))
+            raise ConnectionError("base_url ({}) is not reachable".format(base_url))
         except requests.exceptions.InvalidURL:
             raise ValueError("base_url must be a valid URL")
         except requests.exceptions.InvalidSchema:
@@ -103,6 +105,8 @@ class GameManager(object):
             Call the Game Engine Service /create endpoint
             return: succeeded(bool), game_uuid(uuid.UUID)
         """
+        if not self.playing_locally:
+            sleep(1)
         url = self.base_url + "games/create"
         succeeded = False
         game_uuid = None
@@ -124,6 +128,8 @@ class GameManager(object):
             store uuids in the object.
             return: succeeded(bool), player_uuid(uuid.UUID)
         """
+        if not self.playing_locally:
+            sleep(1)
         self.update_game_uuid(game_uuid)
         url = self.base_url + "games/{}/join?nickname={}".format(str(self.game_uuid), nickname)
         succeeded = False
@@ -138,7 +144,7 @@ class GameManager(object):
                     succeeded = True
                     self.game_uuid = game_uuid
                     self.player_uuid = player_uuid
-                except:
+                except (ValueError, AttributeError, TypeError):
                     pass
         return succeeded, player_uuid
 
@@ -147,6 +153,8 @@ class GameManager(object):
             Call the Game Engine Service /games/{id}/start endpoint
             return: succeeded(bool)
         """
+        if not self.playing_locally:
+            sleep(1)
         self.update_game_uuid(game_uuid)
         self.update_player_uuid(player_uuid)
         url = self.base_url + "games/{}/start?admin_uuid={}".format(str(self.game_uuid), str(self.player_uuid))
@@ -164,6 +172,8 @@ class GameManager(object):
             Call the Game Engine Service /games/{id}/play endpoint
             return: succeeded(bool)
         """
+        if not self.playing_locally:
+            sleep(3)
         self.update_game_uuid(game_uuid)
         self.update_player_uuid(player_uuid)
 
@@ -179,6 +189,8 @@ class GameManager(object):
             Call the Game Engine Service /games/{id} endpoint
             return: succeeded(bool), game_state(dict)
         """
+        if not self.playing_locally:
+            sleep(1)
         self.update_game_uuid(game_uuid)
         self.update_player_uuid(player_uuid)
 
