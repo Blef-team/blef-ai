@@ -69,7 +69,8 @@ class ConservativeAgent(agent.Agent):
 
                 success_prob_of_check = 1-bet_probs[last_bet]
                 bet_probs[last_bet] = 0.0
-                weighted_probs = bet_probs * (bet_probs/sum(bet_probs))
+                normalised_bet_probs = bet_probs / sum(bet_probs) if sum(bet_probs) else bet_probs
+                weighted_probs = bet_probs * (normalised_bet_probs)
                 success_prob_of_bet = sum(weighted_probs)
                 check_vs_bet_probs = np.array([success_prob_of_check, success_prob_of_bet])
                 check_vs_bet_probs **= 2  # Be conservative
@@ -77,11 +78,13 @@ class ConservativeAgent(agent.Agent):
                     self.game_manager.play(88)
                     continue
 
-                check = np.random.choice([True, False], p=check_vs_bet_probs/sum(check_vs_bet_probs))
+                normalised_check_vs_bet_probs = check_vs_bet_probs / sum(check_vs_bet_probs) if sum(check_vs_bet_probs) else check_vs_bet_probs
+                check = np.random.choice([True, False], p=normalised_check_vs_bet_probs)
                 if check:
                     self.game_manager.play(88)
                     continue
 
             bet_probs **= 2  # Be conservative
-            sampled_action = np.random.choice(np.arange(len(bet_probs)), p=bet_probs / sum(bet_probs))
+            normalised_bet_probs = bet_probs / sum(bet_probs) if sum(bet_probs) else bet_probs
+            sampled_action = np.random.choice(np.arange(len(bet_probs)), p=normalised_bet_probs)
             self.game_manager.play(sampled_action)
