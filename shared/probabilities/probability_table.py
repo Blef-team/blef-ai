@@ -1,8 +1,7 @@
 from os import path
-from scipy.special import binom
 from itertools import product
-import pandas as pd
-import numpy as np
+import csv
+from math import comb as binom
 
 
 class BetType(object):
@@ -299,20 +298,23 @@ def generate(filename="bet_probabilities.csv"):
                 BetType.FULLHOUSE_HAVE_2_AND_1: fullhouse_have_2_and_1_prob
             }
 
-            assert all(map(lambda x: (row[x] <= 1.0 or np.isnan(row[x]) or x == "index"), row)) # Probabilities need to <= 1.0
+            assert all(map(lambda x: (row[x] <= 1.0 or x == "index"), row)) # Probabilities need to <= 1.0
             rows.append(row)
 
-    table = pd.DataFrame.from_dict(rows)
-    table.set_index(["index"], inplace=True, verify_integrity=True)
     if filename:
-        table.to_csv(filename)
-
-    return table
+        with open(filename, "w", newline="") as f:
+            writer = csv.DictWriter(f, rows[0].keys(), quoting=csv.QUOTE_NONNUMERIC)
+            print(len(rows), rows[-1]) #DEBUG
+            writer.writeheader()
+            writer.writerows(rows)
+    return rows
 
 
 def load(filename="bet_probabilities.csv"):
     if filename and path.exists(filename):
-        return pd.read_csv(filename, index_col="index")
+        with open(filename, 'r') as filehandle:
+            dict_reader = csv.DictReader(filehandle, quoting=csv.QUOTE_NONNUMERIC)
+            return {row["index"]: row for row in dict_reader}
     else:
         raise FileNotFoundError("Got no valid filename. filename: {}".format(filename))
 

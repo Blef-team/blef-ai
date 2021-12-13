@@ -1,6 +1,5 @@
 import itertools
 from collections import defaultdict
-import numpy as np
 from shared.probabilities import probability_table as pt
 
 
@@ -46,8 +45,8 @@ class Handler(object):
         self.probs_table = pt.get()
         # Validate probs_table - check header for all bet types
         bet_types = [getattr(pt.BetType, attr) for attr in dir(pt.BetType) if not callable(getattr(pt.BetType, attr)) and not attr.startswith("__")]
-        if not all(bet_type in self.probs_table.columns for bet_type in bet_types):
-            print([(bet_type, bet_type in self.probs_table.columns) for bet_type in bet_types])
+        print(self.probs_table, bet_types) #DEBUG
+        if not all(bet_type in self.probs_table[index] for index in self.probs_table for bet_type in bet_types):
             raise ValueError("The probability table is corrupted! Consider deleting the CSV.")
         self.card_values_for_bet = {0: [0], 1: [1], 2: [2], 3: [3], 4: [4], 5: [5], 6: [0], 7: [1], 8: [2], 9: [3], 10: [4], 11: [5], 12: [0, 1], 13: [0, 2], 14: [1, 2], 15: [0, 3], 16: [1, 3], 17: [2, 3], 18: [0, 4], 19: [1, 4], 20: [2, 4], 21: [3, 4], 22: [0, 5], 23: [1, 5], 24: [2, 5], 25: [3, 5], 26: [4, 5], 27: [0, 1, 2, 3, 4], 28: [1, 2, 3, 4, 5], 29: [0, 1, 2, 3, 4, 5], 30: [0], 31: [1], 32: [2], 33: [3], 34: [4], 35: [5], 36: [0, 1], 37: [0, 2], 38: [0, 3], 39: [0, 4], 40: [0, 5], 41: [1, 0], 42: [1, 2], 43: [1, 3], 44: [1, 4], 45: [1, 5], 46: [2, 0], 47: [2, 1], 48: [2, 3], 49: [2, 4], 50: [2, 5], 51: [3, 0], 52: [3, 1], 53: [3, 2], 54: [3, 4], 55: [3, 5], 56: [4, 0], 57: [4, 1], 58: [4, 2], 59: [4, 3], 60: [4, 5], 61: [5, 0], 62: [5, 1], 63: [5, 2], 64: [5, 3], 65: [5, 4], 70: [0], 71: [1], 72: [2], 73: [3], 74: [4], 75: [5], 76: [0, 1, 2, 3, 4], 77: [0, 1, 2, 3, 4], 78: [0, 1, 2, 3, 4], 79: [0, 1, 2, 3, 4], 80: [1, 2, 3, 4, 5], 81: [1, 2, 3, 4, 5], 82: [1, 2, 3, 4, 5], 83: [1, 2, 3, 4, 5], 84: [0, 1, 2, 3, 4, 5], 85: [0, 1, 2, 3, 4, 5], 86: [0, 1, 2, 3, 4, 5], 87: [0, 1, 2, 3, 4, 5]}
         self.card_colour_for_bet = {66: 0, 67: 1, 68: 2, 69: 3, 76: 0, 77: 1, 78: 2, 79: 3, 80: 0, 81: 1, 82: 2, 83: 3, 84: 0, 85: 1, 86: 2, 87: 3}
@@ -62,12 +61,13 @@ class Handler(object):
         if others_card_num <= 0 or (others_card_num + len(cards)) > 24:
             raise ValueError("Invalid 'others_card_num' provided")
         self.others_card_num = others_card_num
-
-        return np.fromfunction(np.vectorize(self.get_bet_prob), (88,))
+        print("[self.get_bet_prob(i) for i in range(88)]", [self.get_bet_prob(i) for i in range(88)]) #DEBUG
+        return [self.get_bet_prob(i) for i in range(88)]
 
     def get_table_value(self, column):
         index = len(self.cards)*100 + self.others_card_num
-        return self.probs_table.at[index, column]
+        print("self.probs_table[index][column]", self.probs_table[index][column]) #DEBUG
+        return self.probs_table[index][column]
 
     def get_bet_prob(self, action_id):
         try:
