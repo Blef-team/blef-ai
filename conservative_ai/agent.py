@@ -59,7 +59,6 @@ class ConservativeAgent(agent.Agent):
             if sum(check_vs_bet_probs) == 0:
                 return 88
 
-            print(normalise(check_vs_bet_probs)) #DEBUG
             check = random.choices([True, False], weights=normalise(check_vs_bet_probs), k=1)[0]
             if check:
                 return 88
