@@ -13,6 +13,8 @@ def normalise(arr):
 def elementwise_mul(first_array, second_array):
     return [a*b for a, b in zip(first_array, second_array)]
 
+def compute_sampling_weights(bet_probs):
+    return normalise([i ** 2 for i in bet_probs]) # Be conservative
 
 class ConservativeAgent(agent.Agent):
     """
@@ -42,7 +44,7 @@ class ConservativeAgent(agent.Agent):
         if game_state.get("history"):
             last_bet = game_state.get("history")[-1]["action_id"]
 
-        if last_bet in range(88):
+        if last_bet and last_bet in range(88):
             for i in range(last_bet):
                 bet_probs[i] = 0.0
 
@@ -51,7 +53,8 @@ class ConservativeAgent(agent.Agent):
 
             success_prob_of_check = 1 - bet_probs[last_bet]
             bet_probs[last_bet] = 0.0
-            weighted_probs = elementwise_mul(bet_probs, normalise(bet_probs))
+            sampling_weights = compute_sampling_weights(bet_probs)
+            weighted_probs = elementwise_mul(sampling_weights, bet_probs)
 
             success_prob_of_bet = sum(weighted_probs)
             check_vs_bet_probs = [success_prob_of_check, success_prob_of_bet]
@@ -63,8 +66,8 @@ class ConservativeAgent(agent.Agent):
             if check:
                 return 88
 
-        bet_probs = [i ** 2 for i in bet_probs]  # Be conservative
-        sampled_action = random.choices(range(len(bet_probs)), weights=normalise(bet_probs), k=1)[0]
+        sampling_weights = compute_sampling_weights(bet_probs)
+        sampled_action = random.choices(range(len(sampling_weights)), weights=sampling_weights, k=1)[0]
 
         return sampled_action
 
