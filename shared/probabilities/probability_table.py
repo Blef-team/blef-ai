@@ -304,7 +304,6 @@ def generate(filename="bet_probabilities.csv"):
     if filename:
         with open(filename, "w", newline="") as f:
             writer = csv.DictWriter(f, rows[0].keys(), quoting=csv.QUOTE_NONNUMERIC)
-            print(len(rows), rows[-1]) #DEBUG
             writer.writeheader()
             writer.writerows(rows)
     return rows
