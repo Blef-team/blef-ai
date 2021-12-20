@@ -1,73 +1,7 @@
 from time import sleep
-import requests
+import urllib3
+import json
 from uuid import UUID
-from jsonschema import Draft6Validator
-
-GAME_STATE_SCHEMA = {
-    "$schema": "https://json-schema.org/schema#",
-
-    "type": "object",
-    "properties": {
-        "game_uuid": {"type": "string"},
-        "players": {
-            "type": "array",
-            "items": {
-                "type": "object",
-                "properties": {
-                        "nickname": {
-                            "type": "string"
-                            },
-                        "n_cards": {
-                            "type": "integer"
-                            }
-                        }
-                }
-            },
-        "hands": {
-            "type": "array",
-            "items": {
-                "type": "object",
-                "properties": {
-                        "nickname": {
-                            "type": "string"
-                            },
-                        "hand": {
-                            "type": "array",
-                            "items": {
-                                "type": "object",
-                                "properties": {
-                                    "value": {
-                                        "type": "integer"
-                                    },
-                                    "colour": {
-                                        "type": "integer"
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            },
-        "history": {
-            "type": "array",
-            "items": {
-                "type": "object",
-                "properties": {
-                    "action_id": {
-                        "type": "integer"
-                        },
-                    "nickname": {
-                        "type": "string"
-                    }
-                }
-            }
-        }
-
-    },
-    "required": ["players", "hands"]
-}
-Draft6Validator.check_schema(GAME_STATE_SCHEMA)
-GAME_STATE_VALIDATOR = Draft6Validator(GAME_STATE_SCHEMA)
 
 
 class GameManager(object):
@@ -89,16 +23,10 @@ class GameManager(object):
             Test whether it's possible to reach a valid
             Game Engine Service at self.base_url
         """
-        try:
-            response = requests.get(base_url+"games")
-            if response.status_code != 200:
-                ConnectionError("base_url is not a valid base path of a running game engine")
-        except requests.exceptions.ConnectionError:
-            raise ConnectionError("base_url ({}) is not reachable".format(base_url))
-        except requests.exceptions.InvalidURL:
-            raise ValueError("base_url must be a valid URL")
-        except requests.exceptions.InvalidSchema:
-            raise ValueError("base_url must start with http://")
+        http = urllib3.PoolManager()
+        response = http.request("GET", base_url+"games")
+        if response.status_code != 200:
+            ConnectionError("base_url is not a valid base path of a running game engine")
 
     def create_game(self):
         """
@@ -110,10 +38,11 @@ class GameManager(object):
         url = self.base_url + "games/create"
         succeeded = False
         game_uuid = None
-        response = requests.get(url)
-        if response.status_code == 200:
-            json = response.json()
-            uuid = json.get("game_uuid")
+        http = urllib3.PoolManager()
+        response = http.request("GET", url)
+        if response.status == 200:
+            json_data = json.loads(response.data)
+            uuid = json_data.get("game_uuid")
             if uuid:
                 try:
                     game_uuid = UUID(uuid)
@@ -134,10 +63,11 @@ class GameManager(object):
         url = self.base_url + "games/{}/join?nickname={}".format(str(self.game_uuid), nickname)
         succeeded = False
         player_uuid = None
-        response = requests.get(url)
-        if response.status_code == 200:
-            json = response.json()
-            uuid = json.get("player_uuid")
+        http = urllib3.PoolManager()
+        response = http.request("GET", url)
+        if response.status == 200:
+            json_data = json.loads(response.data)
+            uuid = json_data.get("player_uuid")
             if uuid:
                 try:
                     player_uuid = UUID(uuid)
@@ -159,10 +89,11 @@ class GameManager(object):
         self.update_player_uuid(player_uuid)
         url = self.base_url + "games/{}/start?admin_uuid={}".format(str(self.game_uuid), str(self.player_uuid))
         succeeded = False
-        response = requests.get(url)
-        if response.status_code == 202:
-            json = response.json()
-            message = json.get("message")
+        http = urllib3.PoolManager()
+        response = http.request("GET", url)
+        if response.status == 202:
+            json_data = json.loads(response.data)
+            message = json_data.get("message")
             if message == "Game started":
                 succeeded = True
         return succeeded
@@ -179,8 +110,9 @@ class GameManager(object):
 
         url = self.base_url + "games/{}/play?player_uuid={}&action_id={}".format(str(self.game_uuid), str(self.player_uuid), action_id)
         succeeded = False
-        response = requests.get(url)
-        if response.status_code == 200:
+        http = urllib3.PoolManager()
+        response = http.request("GET", url)
+        if response.status == 200:
             succeeded = True
         return succeeded
 
@@ -197,10 +129,11 @@ class GameManager(object):
         url = self.base_url + "games/{}?player_uuid={}".format(str(self.game_uuid), str(self.player_uuid))
         succeeded = False
         game_state = None
-        response = requests.get(url)
-        if response.status_code == 200:
-            response_obj = response.json()
-            if response_obj and GAME_STATE_VALIDATOR.is_valid(response_obj):
+        http = urllib3.PoolManager()
+        response = http.request("GET", url)
+        if response.status == 200:
+            response_obj = json.loads(response.data)
+            if response_obj:
                 game_state = response_obj
                 succeeded = True
         return succeeded, game_state

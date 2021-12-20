@@ -1,7 +1,17 @@
-import numpy as np
-from shared.api import game_manager
+import random
 from shared.probabilities import handler
 from shared.ai import agent
+
+
+def normalise(arr):
+    sum_arr = sum(arr)
+    if sum_arr:
+        return [i/sum_arr for i in arr]
+    return arr
+
+
+def elementwise_mul(first_array, second_array):
+    return [a*b for a, b in zip(first_array, second_array)]
 
 
 class ConservativeAgent(agent.Agent):
@@ -13,6 +23,50 @@ class ConservativeAgent(agent.Agent):
     def __init__(self, base_url=None):
         super(ConservativeAgent, self).__init__(base_url)
         self.nickname = "Dazhbog"
+
+    @staticmethod
+    def determine_action(game_state):
+        agent_nickname = game_state["cp_nickname"]
+        matching_hands = [hand for hand in game_state.get("hands", []) if hand.get("nickname") == agent_nickname]
+        if len(matching_hands) != 1:
+            raise ValueError("Can't get my hand from the game state.")
+
+        hand = [(card["value"], card["colour"]) for card in matching_hands[0]["hand"]]
+        players = game_state.get("players", [])
+        others_card_num = sum([player.get("n_cards") for player in players if player.get("nickname", agent_nickname) != agent_nickname])
+        if not players or not others_card_num:
+            raise ValueError("Can't get my hand or other player's card numbers from the game state.")
+
+        bet_probs = handler.Handler().get_probability_vector(hand, others_card_num)
+        last_bet = None
+        if game_state.get("history"):
+            last_bet = game_state.get("history")[-1]["action_id"]
+
+        if last_bet in range(88):
+            for i in range(last_bet):
+                bet_probs[i] = 0.0
+
+            if bet_probs[last_bet] == 0:
+                return 88
+
+            success_prob_of_check = 1 - bet_probs[last_bet]
+            bet_probs[last_bet] = 0.0
+            weighted_probs = elementwise_mul(bet_probs, normalise(bet_probs))
+
+            success_prob_of_bet = sum(weighted_probs)
+            check_vs_bet_probs = [success_prob_of_check, success_prob_of_bet]
+            check_vs_bet_probs = [i ** 2 for i in check_vs_bet_probs]  # Be conservative
+            if sum(check_vs_bet_probs) == 0:
+                return 88
+
+            check = random.choices([True, False], weights=normalise(check_vs_bet_probs), k=1)[0]
+            if check:
+                return 88
+
+        bet_probs = [i ** 2 for i in bet_probs]  # Be conservative
+        sampled_action = random.choices(range(len(bet_probs)), weights=normalise(bet_probs), k=1)[0]
+
+        return sampled_action
 
     def run(self):
         """
@@ -39,49 +93,9 @@ class ConservativeAgent(agent.Agent):
             if game_state.get("cp_nickname") != self.nickname:
                 continue
 
-            matching_hands = [hand for hand in game_state.get("hands", []) if hand.get("nickname") == self.nickname]
-            if len(matching_hands) != 1:
-                print("Can't get my hand from the game state.")
-                continue
-
-            hand = [(card["value"], card["colour"]) for card in matching_hands[0]["hand"]]
-            players = game_state.get("players", [])
-            others_card_num = sum([player.get("n_cards") for player in players if player.get("nickname", self.nickname) != self.nickname])
-            if not players or not others_card_num:
-                print("Can't get my hand or other player's card numbers from the game state.")
-                continue
-
-            bet_probs = self.prob_handler.get_probability_vector(hand, others_card_num)
-            last_bet = None
-            if game_state.get("history"):
-                last_bet = game_state.get("history")[-1]["action_id"]
-
-            if last_bet in range(88):
-                for i in range(last_bet):
-                    bet_probs[i] = 0.0
-
-                if bet_probs[last_bet] == 0:
-                    self.game_manager.play(88)
-                    continue
-
-                success_prob_of_check = 1-bet_probs[last_bet]
-                bet_probs[last_bet] = 0.0
-                normalised_bet_probs = bet_probs / sum(bet_probs) if sum(bet_probs) else bet_probs
-                weighted_probs = bet_probs * (normalised_bet_probs)
-                success_prob_of_bet = sum(weighted_probs)
-                check_vs_bet_probs = np.array([success_prob_of_check, success_prob_of_bet])
-                check_vs_bet_probs **= 2  # Be conservative
-                if sum(check_vs_bet_probs) == 0:
-                    self.game_manager.play(88)
-                    continue
-
-                normalised_check_vs_bet_probs = check_vs_bet_probs / sum(check_vs_bet_probs) if sum(check_vs_bet_probs) else check_vs_bet_probs
-                check = np.random.choice([True, False], p=normalised_check_vs_bet_probs)
-                if check:
-                    self.game_manager.play(88)
-                    continue
-
-            bet_probs **= 2  # Be conservative
-            normalised_bet_probs = bet_probs / sum(bet_probs) if sum(bet_probs) else bet_probs
-            sampled_action = np.random.choice(np.arange(len(bet_probs)), p=normalised_bet_probs)
+            sampled_action = determine_action(game_state, self.nickname)
             self.game_manager.play(sampled_action)
+
+
+# Expose determine_action for import
+determine_action = ConservativeAgent.determine_action
