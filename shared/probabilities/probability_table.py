@@ -310,7 +310,7 @@ def generate(filename="bet_probabilities.csv"):
             writer = csv.DictWriter(f, rows[0].keys(), quoting=csv.QUOTE_NONNUMERIC)
             writer.writeheader()
             writer.writerows(rows)
-    return rows
+    return {row["index"]: row for row in rows}
 
 
 def load(filename="bet_probabilities.csv"):
