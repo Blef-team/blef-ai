@@ -1,7 +1,7 @@
 from os import path
 from itertools import product
 import csv
-from math import comb as binom
+from math import comb
 
 
 class BetType(object):
@@ -45,6 +45,10 @@ class BetType(object):
     FULLHOUSE_HAVE_1_AND_1 = "fullhouse_have_1_and_1"
     FULLHOUSE_HAVE_2_AND_1 = "fullhouse_have_2_and_1"
 
+def binom(n, k):
+    if n < 0 or k < 0:
+        return 0
+    return comb(n, k)
 
 def generate(filename="bet_probabilities.csv"):
     """
