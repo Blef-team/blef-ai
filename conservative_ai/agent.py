@@ -14,7 +14,7 @@ def elementwise_mul(first_array, second_array):
     return [a*b for a, b in zip(first_array, second_array)]
 
 def compute_sampling_weights(bet_probs):
-    return [i ** 2 for i in bet_probs] # Be conservative
+    return normalise([i ** 2 for i in bet_probs]) # Be conservative
 
 class ConservativeAgent(agent.Agent):
     """
@@ -54,7 +54,7 @@ class ConservativeAgent(agent.Agent):
             success_prob_of_check = 1 - bet_probs[last_bet]
             bet_probs[last_bet] = 0.0
             sampling_weights = compute_sampling_weights(bet_probs)
-            weighted_probs = elementwise_mul(sampling_weights, normalise(bet_probs))
+            weighted_probs = elementwise_mul(sampling_weights, bet_probs)
 
             success_prob_of_bet = sum(weighted_probs)
             check_vs_bet_probs = [success_prob_of_check, success_prob_of_bet]
@@ -67,7 +67,7 @@ class ConservativeAgent(agent.Agent):
                 return 88
 
         sampling_weights = compute_sampling_weights(bet_probs)
-        sampled_action = random.choices(range(len(sampling_weights)), weights=normalise(sampling_weights), k=1)[0]
+        sampled_action = random.choices(range(len(sampling_weights)), weights=sampling_weights, k=1)[0]
 
         return sampled_action
 
