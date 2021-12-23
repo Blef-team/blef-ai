@@ -44,7 +44,7 @@ class ConservativeAgent(agent.Agent):
         if game_state.get("history"):
             last_bet = game_state.get("history")[-1]["action_id"]
 
-        if last_bet and last_bet in range(88):
+        if last_bet is not None and last_bet in range(88):
             for i in range(last_bet):
                 bet_probs[i] = 0.0
 
