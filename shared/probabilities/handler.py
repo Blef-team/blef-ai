@@ -10,8 +10,8 @@ class Cards(object):
         super(Cards, self).__init__()
         cards = sorted(cards) # itertools.groupby won't work if cards not sorted
         self.__raw = cards
-        self.values = set(list(zip(*cards))[0])
-        self.colours = set(list(zip(*cards))[1])
+        self.values = set(list(zip(*cards))[0]) if cards else set([])
+        self.colours = set(list(zip(*cards))[1]) if cards else set([])
         # Group cards by colour and value
         self.with_value = self.group_cards(cards, by="value")
         self.with_colour = self.group_cards(cards, by="colour")
@@ -85,7 +85,7 @@ class Handler(object):
             return self.get_straight_prob(action_id)
 
         elif action_id == 29:
-            return self.get_great_straight_prob(action_id)
+            return self.get_great_straight_prob()
 
         elif action_id in range(30, 36):
             return self.get_three_prob(action_id)
@@ -160,7 +160,7 @@ class Handler(object):
             return self.get_table_value(pt.BetType.STRAIGHT_HAVE_1)
         return self.get_table_value(pt.BetType.STRAIGHT)
 
-    def get_great_straight_prob(self, action_id):
+    def get_great_straight_prob(self):
         # Great straight
         have_n_cards = sum([bool(self.cards.with_value[value]) for value in self.cards.with_value])
         if have_n_cards == 6:
@@ -175,7 +175,7 @@ class Handler(object):
             return self.get_table_value(pt.BetType.STRAIGHT_HAVE_1)
         if have_n_cards == 1:
             return self.get_table_value(pt.BetType.STRAIGHT)
-        raise ValueError("It's impossible to have no cards matching a great straight! (empty hand?)")
+        return self.get_table_value(pt.BetType.GREAT_STRAIGHT)
 
     def get_three_prob(self, action_id):
         # Three of a kind
