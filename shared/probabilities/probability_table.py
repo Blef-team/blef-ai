@@ -60,10 +60,12 @@ def generate(filename="bet_probabilities.csv"):
         100*n + o
         i.e. 305 = I have 3 cards and others have 5,
              1012 = I have 10 cards and others have 12
+        Rows indexed 1-24 are unconditional probabilities 
+        (an outside observer's perspective)
     """
     rows = []
     # Enumerate n (your card number) and o (other player card number) combinations
-    for player_card_num in range(1, 12):
+    for player_card_num in range(12):
         for others_card_num in range(1, 25-player_card_num):
 
             n = player_card_num
@@ -157,7 +159,7 @@ def generate(filename="bet_probabilities.csv"):
 
             # Straight
             occurance_combinations = product(range(1, 5), range(1, 5), range(1, 5), range(1, 5), range(1, 5))
-            frequency = sum([binom(4, c1)*binom(4, c2)*binom(4, c3)*binom(4, c4)*binom(4, c5)*binom(24-n-5*4, o-c1-c2-c3-c4-c5) for c1, c2, c3, c4, c5 in occurance_combinations])
+            frequency = sum([binom(4, c1)*binom(4, c2)*binom(4, c3)*binom(4, c4)*binom(4, c5)*binom(24-n-5*4, o-c1-c2-c3-c4-c5) for c1, c2, c3, c4, c5 in occurance_combinations if o-c1-c2-c3-c4-c5>=1 or n>=1])
             straight_prob = frequency / all_states
 
             # Straight have 1
