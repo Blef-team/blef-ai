@@ -27,6 +27,7 @@ class BetType(object):
     COLOUR_HAVE_2 = "colour_have_2"
     COLOUR_HAVE_3 = "colour_have_3"
     COLOUR_HAVE_4 = "colour_have_4"
+    GREAT_STRAIGHT = "great_straight"
     STRAIGHT = "straight"
     STRAIGHT_HAVE_1 = "straight_have_1"
     STRAIGHT_HAVE_2 = "straight_have_2"
@@ -157,9 +158,16 @@ def generate(filename="bet_probabilities.csv"):
                 frequency = binom(2,1) * binom(24-n-2, o-1) + binom(2,2) * binom(24-n-2, o-2)
             colour_have_4_prob = frequency / all_states
 
+            # Great straight
+            frequency = 0
+            if n == 0:
+                occurance_combinations = product(range(1, 5), range(1, 5), range(1, 5), range(1, 5), range(1, 5), range(1, 5))
+                frequency = sum([binom(4, c1)*binom(4, c2)*binom(4, c3)*binom(4, c4)*binom(4, c5)*binom(4, c6) for c1, c2, c3, c4, c5, c6 in occurance_combinations if c1+c2+c3+c4+c5+c6==o])
+            great_straight_prob = frequency / all_states
+
             # Straight
             occurance_combinations = product(range(1, 5), range(1, 5), range(1, 5), range(1, 5), range(1, 5))
-            frequency = sum([binom(4, c1)*binom(4, c2)*binom(4, c3)*binom(4, c4)*binom(4, c5)*binom(24-n-5*4, o-c1-c2-c3-c4-c5) for c1, c2, c3, c4, c5 in occurance_combinations if o-c1-c2-c3-c4-c5>=1 or n>=1])
+            frequency = sum([binom(4, c1)*binom(4, c2)*binom(4, c3)*binom(4, c4)*binom(4, c5)*binom(24-n-5*4, o-c1-c2-c3-c4-c5) for c1, c2, c3, c4, c5 in occurance_combinations])
             straight_prob = frequency / all_states
 
             # Straight have 1
@@ -285,6 +293,7 @@ def generate(filename="bet_probabilities.csv"):
                 BetType.COLOUR_HAVE_2: colour_have_2_prob,
                 BetType.COLOUR_HAVE_3: colour_have_3_prob,
                 BetType.COLOUR_HAVE_4: colour_have_4_prob,
+                BetType.GREAT_STRAIGHT: great_straight_prob,
                 BetType.STRAIGHT: straight_prob,
                 BetType.STRAIGHT_HAVE_1: straight_have_1_prob,
                 BetType.STRAIGHT_HAVE_2: straight_have_2_prob,
@@ -334,4 +343,3 @@ def get():
 if __name__ == "__main__":
     """ Run script manually - generate and save a table of probabilities """
     table = generate()
-    print("Generated a probability table with {} rows and {} columns.".format(table.shape[0], table.shape[1]))
