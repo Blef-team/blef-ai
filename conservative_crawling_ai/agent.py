@@ -13,8 +13,8 @@ def normalise(arr):
 def elementwise_mul(first_array, second_array):
     return [a*b for a, b in zip(first_array, second_array)]
 
-def compute_sampling_weights(bet_probs):
-    return normalise([i ** 3 for i in bet_probs]) # Be conservative
+def compute_sampling_weights(bet_probs, bet_probs_generic):
+    return normalise([bet_probs[i] ** 3 * bet_probs_generic[i] ** 2 for i in range(0, 88)])
 
 class ConservativeAgent(agent.Agent):
     """
@@ -36,10 +36,12 @@ class ConservativeAgent(agent.Agent):
         hand = [(card["value"], card["colour"]) for card in matching_hands[0]["hand"]]
         players = game_state.get("players", [])
         others_card_num = sum([player.get("n_cards") for player in players if player.get("nickname", agent_nickname) != agent_nickname])
+        total_card_num = sum([player.get("n_cards") for player in players])
         if not players or not others_card_num:
             raise ValueError("Can't get my hand or other player's card numbers from the game state.")
 
         bet_probs = handler.Handler().get_probability_vector(hand, others_card_num)
+        bet_probs_generic = handler.Handler().get_probability_vector([], total_card_num)
         last_bet = None
         if game_state.get("history"):
             last_bet = game_state.get("history")[-1]["action_id"]
@@ -53,7 +55,7 @@ class ConservativeAgent(agent.Agent):
 
             success_prob_of_check = 1 - bet_probs[last_bet]
             bet_probs[last_bet] = 0.0
-            sampling_weights = compute_sampling_weights(bet_probs)
+            sampling_weights = compute_sampling_weights(bet_probs, bet_probs_generic)
             weighted_probs = elementwise_mul(sampling_weights, bet_probs)
 
             success_prob_of_bet = sum(weighted_probs)
@@ -66,7 +68,7 @@ class ConservativeAgent(agent.Agent):
             if check:
                 return 88
 
-        sampling_weights = compute_sampling_weights(bet_probs)
+        sampling_weights = compute_sampling_weights(bet_probs, bet_probs_generic)
         sampled_action = random.choices(range(len(sampling_weights)), weights=sampling_weights, k=1)[0]
 
         return sampled_action
