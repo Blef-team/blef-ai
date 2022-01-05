@@ -16,15 +16,15 @@ def elementwise_mul(first_array, second_array):
 def compute_sampling_weights(bet_probs, bet_probs_generic):
     return normalise([bet_probs[i] ** 3 * bet_probs_generic[i] ** 2 for i in range(0, 88)])
 
-class ConservativeAgent(agent.Agent):
+class ConservativeCrawlingAgent(agent.Agent):
     """
         Autonomous AI Agent class to play Blef.
         A simple, conservative agent.
     """
 
     def __init__(self, base_url=None):
-        super(ConservativeAgent, self).__init__(base_url)
-        self.nickname = "Dazhbog"
+        super(ConservativeCrawlingAgent, self).__init__(base_url)
+        self.nickname = "Porevit"
 
     @staticmethod
     def determine_action(game_state):
@@ -103,4 +103,4 @@ class ConservativeAgent(agent.Agent):
 
 
 # Expose determine_action for import
-determine_action = ConservativeAgent.determine_action
+determine_action = ConservativeCrawlingAgent.determine_action
