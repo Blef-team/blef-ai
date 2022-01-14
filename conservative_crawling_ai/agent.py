@@ -14,7 +14,9 @@ def elementwise_mul(first_array, second_array):
     return [a*b for a, b in zip(first_array, second_array)]
 
 def compute_sampling_weights(bet_probs, bet_probs_generic):
-    return normalise([bet_probs[i] ** 3 * bet_probs_generic[i] ** 2 for i in range(0, 88)])
+    if len(bet_probs) != len(bet_probs_generic):
+        raise ValueError("Bet probability arrays are not of equal length")
+    return normalise([bet_probs[i] ** 3 * bet_probs_generic[i] ** 2 for i in range(len(bet_probs))])
 
 class ConservativeCrawlingAgent(agent.Agent):
     """
